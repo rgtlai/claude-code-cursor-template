@@ -267,10 +267,10 @@ The frontend build process creates a `dist/` folder that the backend serves dire
 
 ### Frontend Setup
 1. Ensure Node.js 20 LTS+ is installed: `node --version`
-2. Install Node.js dependencies: `npm install`
+2. Install Node.js dependencies: `pnpm install`
 3. Environment variables are loaded from root `.env` file (Vite will automatically pick up VITE_ prefixed variables)
-4. Run development server: `npm run dev`
-5. Build for production: `npm run build`
+4. Run development server: `pnpm dev`
+5. Build for production: `pnpm build`
 
 ## WebSocket Implementation Details
 
