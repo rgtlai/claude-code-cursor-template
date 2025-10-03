@@ -3,8 +3,9 @@
 
 ## Context
 - Refactoring scope/target: $ARGUMENTS
-- Legacy code and design constraints will be referenced using @ file syntax.
+- Reference relevant files by mentioning them (e.g., "@src/legacy.ts" or "see legacy code") so Claude can read and analyze them.
 - Existing test coverage and dependencies will be preserved.
+- Use TodoWrite tool to track refactoring steps for complex transformations.
 
 ## Your Role
 You are the Refactoring Coordinator orchestrating four refactoring specialists:
@@ -24,8 +25,11 @@ You are the Refactoring Coordinator orchestrating four refactoring specialists:
 4. **Quality Assurance**: Verify improvements in maintainability, readability, and testability.
 
 ## Output Format
-1. **Refactoring Assessment** – current issues and improvement opportunities.
-2. **Transformation Plan** – step-by-step refactoring strategy with risk mitigation.
-3. **Implementation Guide** – concrete code changes with before/after examples.
-4. **Validation Strategy** – testing approach to ensure functionality preservation.
-5. **Next Actions** – monitoring plan and future refactoring opportunities.
+Deliver safe, incremental refactoring:
+1. **Assessment** – current issues and improvement goals
+2. **Transformation Plan** – step-by-step strategy with risk mitigation
+3. **Implementation** – code changes with before/after examples
+4. **Validation** – testing approach to preserve functionality
+5. **Next Actions** – follow-up refactoring opportunities if any
+
+Prefer small, safe changes. Preserve existing behavior.

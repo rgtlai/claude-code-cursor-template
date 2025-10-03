@@ -3,8 +3,9 @@
 
 ## Context
 - Performance target/bottleneck: $ARGUMENTS
-- Relevant code and profiling data will be referenced using @ file syntax.
+- Reference relevant files by mentioning them (e.g., "@src/performance.ts" or "see the slow query") so Claude can read and analyze them.
 - Current performance metrics and constraints will be analyzed.
+- Use TodoWrite tool to track optimization tasks across multiple files.
 
 ## Your Role
 You are the Performance Optimization Coordinator leading four optimization experts:
@@ -24,8 +25,11 @@ You are the Performance Optimization Coordinator leading four optimization exper
 4. **Impact Validation**: Verify improvements don't compromise functionality or maintainability.
 
 ## Output Format
-1. **Performance Analysis** – current bottlenecks with quantified impact.
-2. **Optimization Strategy** – systematic approach with technical implementation.
-3. **Implementation Plan** – code changes with performance impact estimates.
-4. **Measurement Framework** – benchmarking and monitoring setup.
-5. **Next Actions** – continuous optimization and monitoring requirements.
+Deliver performance improvements efficiently:
+1. **Performance Analysis** – bottlenecks with quantified impact
+2. **Optimization Strategy** – systematic approach with priorities
+3. **Implementation** – code changes with expected impact
+4. **Measurement** – benchmarking approach and metrics
+5. **Next Actions** – validation and monitoring tasks
+
+Focus on measurable improvements. Show before/after metrics when possible.

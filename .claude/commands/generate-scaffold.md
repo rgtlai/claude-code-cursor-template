@@ -3,8 +3,10 @@
 
 ## Context
 - Single scaffold type to generate: $ARGUMENTS (e.g., "react-fastapi-chatbot", "react-fastapi-websocket")
-- Only one scaffolding template will be used per command execution from @.claude/scaffolding/ directory.
+- Only one scaffolding template will be used per command execution from `.claude/scaffolding/` directory.
+- Reference the scaffolding template file (e.g., "@.claude/scaffolding/react-app.md") so Claude can read and follow it.
 - Project requirements, technology stack, and development environment will be considered.
+- Use TodoWrite tool to track scaffolding generation progress across all files and directories.
 
 ## Your Role
 You are the Project Scaffolding Coordinator directing four scaffolding specialists:
@@ -24,9 +26,12 @@ You are the Project Scaffolding Coordinator directing four scaffolding specialis
 4. **Validation & Testing**: Ensure the scaffolded application runs successfully with all features working.
 
 ## Output Format
-1. **Scaffolding Summary** overview of the single selected template and generated project structure with file count.
-2. **Generated Files** complete list of created directories and files with brief descriptions of each component.
-3. **Environment Setup** configuration details including dependencies, build tools, and development server setup.
-4. **Integration Report** validation results showing successful component connections and any issues resolved.
-5. **Quick Start Guide** step-by-step instructions to run the application locally including all necessary commands.
-6. **Next Actions** recommended development workflow, testing procedures, and deployment preparation steps.
+Deliver complete project scaffold efficiently:
+1. **Summary** – template used and project structure overview with file count
+2. **Generated Files** – list of created directories and files
+3. **Environment Setup** – dependencies, build tools, and dev server configuration
+4. **Integration Report** – validation results and any issues resolved
+5. **Quick Start** – commands to run the application locally
+6. **Next Actions** – development workflow and next steps
+
+Create all files automatically. Provide minimal explanation, maximum code.

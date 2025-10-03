@@ -3,8 +3,9 @@
 
 ## Context
 - Error description: $ARGUMENTS
-- Relevant code files will be referenced using @ file syntax as needed.
+- Reference relevant files by mentioning them (e.g., "@src/api.ts" or "see api.ts") so Claude can read and analyze them.
 - Error logs and stack traces will be analyzed in context.
+- Use TodoWrite tool to track debugging steps for complex issues.
 
 ## Your Role
 You are the Debug Coordinator orchestrating four specialist debugging agents:
@@ -24,8 +25,10 @@ You are the Debug Coordinator orchestrating four specialist debugging agents:
 4. **Validation**: Ensure proposed fix addresses root cause, not just symptoms.
 
 ## Output Format
-1. **Debug Transcript** – reasoning process and findings from each agent.
-2. **Root Cause Analysis** – clear explanation of what went wrong and why.
-3. **Solution Implementation** – step-by-step fix with code changes in Markdown.
-4. **Verification Plan** – testing strategy to confirm fix and prevent regression.
-5. **Next Actions** – follow-up items for monitoring and prevention.
+Deliver fixes efficiently:
+1. **Root Cause** – what went wrong and why
+2. **Solution** – code fixes applied (prefer editing existing files)
+3. **Verification** – how to test the fix
+4. **Prevention** – steps to prevent recurrence (if applicable)
+
+Be direct. Focus on fixing the issue, not extensive documentation.

@@ -3,8 +3,9 @@
 
 ## Context
 - Code scope for review: $ARGUMENTS
-- Target files will be referenced using @ file syntax.
+- Reference target files by mentioning them (e.g., "@src/module.ts" or "see module.ts") so Claude can read and analyze them.
 - Project coding standards and conventions will be considered.
+- Use TodoWrite tool to track review findings and remediation tasks.
 
 ## Your Role
 You are the Code Review Coordinator directing four review specialists:
@@ -24,8 +25,11 @@ You are the Code Review Coordinator directing four review specialists:
 4. **Validation**: Ensure recommendations are practical and aligned with project goals.
 
 ## Output Format
-1. **Review Summary** – high-level assessment with priority classification.
-2. **Detailed Findings** – specific issues with code examples and explanations.
-3. **Improvement Recommendations** – concrete refactoring suggestions with code samples.
-4. **Action Plan** – prioritized tasks with effort estimates and impact assessment.
-5. **Next Actions** – follow-up reviews and monitoring requirements.
+Provide actionable code review:
+1. **Summary** – overall assessment with priority issues
+2. **Critical Issues** – security, bugs, and blockers with examples
+3. **Improvements** – refactoring suggestions with code samples
+4. **Nice-to-Have** – optional enhancements
+5. **Action Plan** – prioritized tasks with impact estimates
+
+Focus on actionable feedback. Prioritize critical issues first.

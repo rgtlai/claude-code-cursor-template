@@ -3,7 +3,7 @@
 
 ## Context
 - Technical question or architecture challenge: $ARGUMENTS
-- Relevant system documentation and design artifacts will be referenced using @ file syntax.
+- Reference relevant files by mentioning them (e.g., "@docs/architecture.md" or "see the system design") so Claude can read and analyze them.
 - Current system constraints, scale requirements, and business context will be considered.
 
 ## Your Role
@@ -24,11 +24,14 @@ You are a Senior Systems Architect providing expert consultation and architectur
 4. **Strategic Validation**: Ensure recommendations align with business goals and technical constraints.
 
 ## Output Format
-1. **Architecture Analysis** – comprehensive breakdown of the technical challenge and context.
-2. **Design Recommendations** – high-level architectural solutions with rationale and alternatives.
-3. **Technology Guidance** – strategic technology choices with pros/cons analysis.
-4. **Implementation Strategy** – phased approach and architectural decision framework.
-5. **Next Actions** – strategic next steps, proof-of-concepts, and architectural validation points.
+Provide concise, actionable architectural guidance with:
+1. **Architecture Analysis** – breakdown of the technical challenge
+2. **Design Recommendations** – architectural solutions with rationale and trade-offs
+3. **Technology Guidance** – technology choices with pros/cons
+4. **Implementation Strategy** – phased approach and decision framework
+5. **Next Actions** – concrete next steps for validation
+
+Keep responses focused and technical. Avoid unnecessary elaboration.
 
 ## Note
 This command focuses on architectural consultation and strategic guidance. For implementation details and code generation, use @code.md instead.

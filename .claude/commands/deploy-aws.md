@@ -2,10 +2,11 @@
 `@deploy-aws.md <PROJECT_SCOPE>`
 
 ## Context
-- Project scope for AWS deployment readiness check: $ARGUMENTS
-- Codebase files will be referenced using @ file syntax for comprehensive analysis.
+- Project scope for AWS deployment readiness check: $ARGUMENTS (specify project path or "entire project")
+- Reference relevant files by mentioning them (e.g., "@Dockerfile" or "see package.json") so Claude can read and analyze them.
 - AWS deployment patterns, security requirements, and infrastructure best practices will be considered.
-- Command will first ask for deployment type preference and provide tailored recommendations for the chosen AWS service.
+- This command first asks for deployment type preference and provides tailored recommendations for the chosen AWS service.
+- Use TodoWrite tool to track deployment preparation tasks and file generation.
 
 ## Your Role
 You are the AWS Deployment Coordinator directing four deployment specialists:
@@ -35,11 +36,14 @@ You are the AWS Deployment Coordinator directing four deployment specialists:
 5. **Automated Setup**: Automatically create missing critical deployment files including .github/workflows directory structure and AWS deployment YAML tailored to chosen deployment type.
 
 ## Output Format
-1. **Deployment Recommendations** – analysis-based AWS service recommendations with pros/cons for each option tailored to the specific project.
-2. **Readiness Report** – deployment readiness score with comprehensive checklist and issue breakdown by severity.
-3. **Files Created** – list of automatically generated deployment files including .github/workflows/deploy-aws.yml with full directory structure.
-4. **Critical Issues** – blocking problems that prevent deployment with specific remediation steps.
-5. **Configuration Summary** – overview of created Dockerfile, docker-compose.yml, GitHub Actions workflow, and infrastructure templates specific to chosen deployment type.
-6. **Security Setup** – automatically configured .gitignore entries, environment variable templates, and secrets management guidelines.
-7. **Cost Analysis** – estimated monthly costs for recommended AWS services with optimization suggestions.
-8. **Next Actions** – step-by-step deployment preparation tasks including AWS credentials setup and repository secrets configuration.
+Provide comprehensive AWS deployment readiness:
+1. **Deployment Recommendations** – AWS service options with pros/cons for this project
+2. **Readiness Score** – overall readiness with critical blockers
+3. **Files Created** – generated deployment files (.github/workflows/, Dockerfile, etc.)
+4. **Critical Issues** – blockers with remediation steps
+5. **Configuration Summary** – overview of all deployment configs created
+6. **Security Setup** – .gitignore, secrets management, environment variables
+7. **Cost Estimate** – monthly AWS costs with optimization tips
+8. **Next Actions** – step-by-step preparation tasks
+
+Automatically create missing deployment files. Focus on actionable items.
