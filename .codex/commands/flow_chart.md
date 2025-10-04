@@ -14,7 +14,10 @@ Inspect the specified application areas and generate Markdown flowchart files (M
 1. Resolve the analysis scope, list its top-level structure, and note major components.
 2. Examine entry points, routing/navigation, business logic, persistence models, external integrations, and asynchronous jobs.
 3. Draft a Mermaid flowchart adhering to the standards below; split large systems into multiple focused charts when clarity requires it.
-4. Save each chart to `.codex/diagrams/{target-name}-flow.md` (create the directory when missing) and summarize findings in the response.
+4. For each chart:
+   - If no path is specified, save it to `./diagrams/{target-name}-flow.md` (create `./diagrams/` if it does not exist).
+   - If a path is specified, save it to `{path}/diagrams/{target-name}-flow.md` (create `{path}/diagrams/` if it does not exist).
+   - Summarize findings in the response.
 
 ## Mermaid Standards
 - Shapes: `([Rounded])` entry/exit, `[Rectangle]` processes, `{Diamond}` decisions, `[(Database)]` data stores, `[[Subroutine]]` external services, `[/Parallelogram/]` I/O.

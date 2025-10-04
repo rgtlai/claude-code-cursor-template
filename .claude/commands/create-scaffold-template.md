@@ -1,8 +1,8 @@
 ## Usage
-`@create-scaffold.md`
+`@create-scaffold-template`
 
 ## Context
-This command helps you create a new custom scaffolding template that can be used with @generate-scaffold.md. The interactive process will gather your requirements and generate a comprehensive scaffolding guide in the `.claude/scaffolding/` directory. Use TodoWrite tool to track the template creation process.
+This command helps you create a new custom scaffolding template that can be used with @generate-scaffold.md. The interactive process will gather your requirements and generate a comprehensive scaffolding guide in the `./scaffolding/` directory. Use TodoWrite tool to track the template creation process.
 
 ## Your Role
 You are a Scaffolding Template Creator helping users design custom application scaffolds. You will guide users through defining their project requirements and generate a complete scaffolding template.
@@ -46,7 +46,7 @@ You are a Scaffolding Template Creator helping users design custom application s
    - Documentation preferences
 
 ## Template Generation
-After gathering all requirements, create a comprehensive scaffolding template file in `.claude/scaffolding/` with the following structure:
+After gathering all requirements, create a comprehensive scaffolding template file in `./scaffolding/` with the following structure:
 
 1. **Project Overview** - Summary of the stack and features
 2. **Prerequisites** - Required tools and versions
@@ -71,7 +71,7 @@ Start by asking these key questions in order:
 
 ## Output Format
 After gathering requirements, create a comprehensive scaffolding template file:
-- Filename: `{descriptive-name}.md` in `.claude/scaffolding/` directory
+- Filename: `{descriptive-name}.md` in `./scaffolding/` directory
 - Content: Complete project specification for @generate-scaffold.md to execute
 - Include: All file structures, configurations, dependencies, and setup instructions
 

@@ -3,8 +3,8 @@
 
 ## Context
 - Single scaffold type to generate: $ARGUMENTS (e.g., "react-fastapi-chatbot", "react-fastapi-websocket")
-- Only one scaffolding template will be used per command execution from `.claude/scaffolding/` directory.
-- Reference the scaffolding template file (e.g., "@.claude/scaffolding/react-app.md") so Claude can read and follow it.
+- Only one scaffolding template will be used per command execution from `./scaffolding/` directory.
+- Reference the scaffolding template file (e.g., "@./scaffolding/react-app.md") so Claude can read and follow it.
 - Project requirements, technology stack, and development environment will be considered.
 - Use TodoWrite tool to track scaffolding generation progress across all files and directories.
 
@@ -16,7 +16,7 @@ You are the Project Scaffolding Coordinator directing four scaffolding specialis
 4. **Integration Validator** ensures all components work together and validates the complete setup.
 
 ## Process
-1. **Template Selection**: Identify and load the single specified scaffolding guide from @.claude/scaffolding/ directory.
+1. **Template Selection**: Identify and load the single specified scaffolding guide from @./scaffolding/ directory.
 2. **Project Structure Creation**:
    - Architecture Planner: Parse scaffolding template and plan complete directory structure
    - Code Generator: Create all files including source code, configuration files, and documentation

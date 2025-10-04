@@ -1,5 +1,5 @@
 ## Usage
-`@create-scaffold`
+`@create-scaffold-template`
 
 ## Purpose
 Guide the user through defining a reusable scaffolding template that can later be executed by `@generate-scaffold`.
@@ -19,7 +19,7 @@ Act as the Scaffolding Template Creator synthesizing inputs into a complete spec
 1. Establish baseline context with the six starter questions (project type, domain, language, core features, tool choices, deployment).
 2. Dive deeper according to answers: stack specifics, data/storage, CI/CD, testing, environment setup, documentation.
 3. Consolidate the findings into a thorough scaffold blueprint.
-4. Save the final template in `.codex/scaffolding/{descriptive-name}.md` (create the directory if missing).
+4. Save the final template in `./scaffolding/{descriptive-name}.md` (create the directory if missing).
 
 ## Template Requirements
 Each template must contain:

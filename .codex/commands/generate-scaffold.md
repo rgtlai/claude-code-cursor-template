@@ -2,11 +2,11 @@
 `@generate-scaffold <TEMPLATE_NAME>`
 
 ## Purpose
-Instantiate a full project scaffold from one template stored under `.codex/scaffolding/`, creating every directory, file, and configuration described.
+Instantiate a full project scaffold from one template stored under `./scaffolding/`, creating every directory, file, and configuration described.
 
 ## Inputs
 - $ARGUMENTS — the template filename (without path) to execute, for example `react-fastapi-websocket`
-- Reference the chosen template explicitly (for example `.codex/scaffolding/react-fastapi-websocket.md`)
+- Reference the chosen template explicitly (for example `./scaffolding/react-fastapi-websocket.md`)
 - Confirm any environment assumptions or optional variants with the user before generation
 
 ## Persona & Collaboration
