@@ -1,5 +1,5 @@
 ## Usage
-`@flow_chart [TARGET_PATH ...]`
+`@flow-chart-diagram [TARGET_PATH ...]`
 
 ## Purpose
 Inspect the specified application areas and generate Markdown flowchart files (Mermaid syntax) that communicate the system’s architecture, data flow, and key interactions. The command must write the chart files to disk; do not only print them in chat.

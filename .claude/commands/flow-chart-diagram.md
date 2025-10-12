@@ -1,5 +1,5 @@
 ## Usage
-`@flow_chart.md [TARGET_PATH ...]`
+`@flow-chart-diagram.md [TARGET_PATH ...]`
 
 ## Context
 - Target paths: $ARGUMENTS (defaults to current directory if omitted)
