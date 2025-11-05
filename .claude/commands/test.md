@@ -1,3 +1,8 @@
+---
+description: Create comprehensive test coverage for components and features
+argument-hint: [component or feature]
+---
+
 ## Usage
 `@test.md <COMPONENT_OR_FEATURE>`
 

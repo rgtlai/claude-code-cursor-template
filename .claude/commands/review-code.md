@@ -1,3 +1,8 @@
+---
+description: Conduct multi-dimensional code review for quality and security
+argument-hint: [code scope]
+---
+
 ## Usage
 `@review-code.md <CODE_SCOPE>`
 

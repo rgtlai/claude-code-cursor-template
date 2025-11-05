@@ -1,3 +1,8 @@
+---
+description: Create a new custom scaffolding template for project generation
+argument-hint:
+---
+
 ## Usage
 `@create-scaffold-template`
 

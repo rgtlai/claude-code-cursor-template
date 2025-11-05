@@ -1,3 +1,8 @@
+---
+description: Debug and fix errors with systematic root cause analysis
+argument-hint: [error description]
+---
+
 ## Usage
 `@debug.md <ERROR_DESCRIPTION>`
 

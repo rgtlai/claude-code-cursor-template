@@ -1,3 +1,8 @@
+---
+description: Optimize performance with measurable improvements
+argument-hint: [performance target]
+---
+
 ## Usage
 `@optimize.md <PERFORMANCE_TARGET>`
 

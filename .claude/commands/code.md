@@ -1,3 +1,8 @@
+---
+description: Implement features with clean, efficient, and maintainable code
+argument-hint: [feature description]
+---
+
 ## Usage
 `@code.md <FEATURE_DESCRIPTION>`
 

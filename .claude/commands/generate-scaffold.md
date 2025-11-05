@@ -1,3 +1,8 @@
+---
+description: Generate a complete project scaffold from a template
+argument-hint: [scaffold type]
+---
+
 ## Usage
 `@generate-scaffold.md <SCAFFOLD_TYPE>`
 

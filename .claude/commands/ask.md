@@ -1,3 +1,8 @@
+---
+description: Get expert architectural consultation and technical guidance
+argument-hint: [technical question]
+---
+
 ## Usage
 `@ask.md <TECHNICAL_QUESTION>`
 

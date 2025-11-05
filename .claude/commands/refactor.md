@@ -1,3 +1,8 @@
+---
+description: Refactor code for better maintainability and quality
+argument-hint: [refactor scope]
+---
+
 ## Usage
 `@refactor.md <REFACTOR_SCOPE>`
 

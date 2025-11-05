@@ -1,3 +1,8 @@
+---
+description: Diagnose issues with comprehensive analysis (no code changes)
+argument-hint: [error description]
+---
+
 ## Usage
 `@diagnose.md <ERROR_DESCRIPTION>`
 

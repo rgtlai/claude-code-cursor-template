@@ -1,3 +1,8 @@
+---
+description: Generate Mermaid flowchart diagrams from codebase analysis
+argument-hint: [target path ...]
+---
+
 ## Usage
 `@flow-chart-diagram.md [TARGET_PATH ...]`
 
