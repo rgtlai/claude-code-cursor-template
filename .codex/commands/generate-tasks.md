@@ -57,6 +57,14 @@ Operate as the Technical Project Planner coordinating four focus roles:
    - For NFR tasks, include measurable checks/harnesses (e.g., perf budgets, a11y checks, security linting) and instrumentation
 8. **Identify Relevant Files**: List potential files to be created or modified, including test files; link each to FR/NFR IDs
 9. **Generate Final Output**: Consolidate all information into the output file
+10. **Update Global Index**:
+    - Create or update `tasks/_index.md`
+    - Add this PRD’s parent tasks and dependencies to the global Blocked/Prereqs table
+    - Recompute global ordering and list conflicts/overlaps for review
+    - Example (pseudocode):
+      - Open `tasks/_index.md`
+      - In "Blocked/Prereqs Table (Global)" add a row: `| tasks-[prd].md 1.0 | PRD-0001-FR-3; tasks-prd-0001.md 2.0 | N | Waiting for auth middleware |`
+      - In "Global Task Dependencies" append this PRD’s parent tasks in topo order
 
 ## Deliverables
 - **Relevant Files Section**:

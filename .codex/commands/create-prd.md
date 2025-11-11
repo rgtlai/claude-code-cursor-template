@@ -1,12 +1,13 @@
 ## Usage
-`@create-prd <FEATURE_DESCRIPTION>`
+`@create-prd <FEATURE_DESCRIPTION|PATH>`
 
 ## Purpose
 Generate a comprehensive Product Requirements Document (PRD) for a new feature by gathering requirements through structured questioning and producing clear, actionable documentation suitable for junior developers.
 
 ## Inputs
-- $ARGUMENTS — initial feature description or request
-- PRD will be saved in `/tasks/` directory with sequential numbering (e.g., 0001-prd-feature-name.md)
+- $ARGUMENTS — initial feature description or a path to a file containing the description/spec
+- If $ARGUMENTS is a readable path, read its contents and treat that as the feature description input
+- PRD will be saved in `/prds/` directory with sequential numbering (e.g., 0001-prd-feature-name.md)
 - Target audience is junior developers who will implement the feature
 
 ## Persona & Collaboration
@@ -39,7 +40,7 @@ Act as the Product Requirements Specialist coordinating insights from four virtu
      - Deployment targets and environments
      - If unclear, present 2–3 sensible options with trade-offs and ask the user to choose; never assume
 3. Based on responses, create a comprehensive PRD with all required sections.
-4. Save the document as `/tasks/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.).
+4. Save the document as `/prds/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.).
 
 ## Deliverables
 - **Introduction/Overview** — feature description and problem it solves

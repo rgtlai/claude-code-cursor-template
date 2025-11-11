@@ -1,14 +1,15 @@
 ---
 description: Generate a Product Requirements Document (PRD) for a new feature
-argument-hint: [feature description]
+argument-hint: [feature description or path]
 ---
 
 ## Usage
-`@create-prd.md <FEATURE_DESCRIPTION>`
+`@create-prd.md <FEATURE_DESCRIPTION|PATH>`
 
 ## Context
-- Feature description or request: $ARGUMENTS
-- PRD will be saved in `/tasks/` directory with sequential numbering (e.g., 0001-prd-feature-name.md)
+- Feature description or request: $ARGUMENTS (accepts plain text or a path to a file containing the description/spec)
+- If $ARGUMENTS looks like a readable file path, read its contents and treat that as the feature description input
+- PRD will be saved in `/prds/` directory with sequential numbering (e.g., 0001-prd-feature-name.md)
 - Target audience is junior developers who will implement the feature
 - Questions will be asked to gather requirements before generating the PRD
 
@@ -16,7 +17,7 @@ argument-hint: [feature description]
 You are a Product Requirements Specialist creating detailed PRDs for software features. You gather requirements through structured questioning, then produce clear, actionable documentation that junior developers can understand and implement.
 
 ## Process
-1. **Analyze Feature Request**: Review the initial feature description provided in $ARGUMENTS
+1. **Analyze Feature Request**: Review the initial feature description provided in $ARGUMENTS. If $ARGUMENTS is a readable file path, load its contents first; otherwise use the raw string
 2. **Ask Clarifying Questions**: Gather detailed requirements by asking targeted questions about:
    - Problem/Goal: What problem does this solve? What's the main objective?
    - Target User: Who will use this feature?
@@ -39,7 +40,7 @@ You are a Product Requirements Specialist creating detailed PRDs for software fe
      - CI and deployment targets
      - If uncertain, propose 2–3 viable options with brief trade-offs and ask the user to choose; do not assume
 3. **Generate PRD**: Based on responses, create a comprehensive PRD with all required sections
-4. **Save Document**: Save as `/tasks/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.)
+4. **Save Document**: Save as `/prds/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.)
 
 ## Output Format
 Generate PRD with the following structure:
@@ -81,7 +82,7 @@ Keep requirements explicit, unambiguous, and accessible to junior developers.
 - Do NOT start implementing the PRD
 - Ask clarifying questions before generating the PRD
 - Use user's answers to create a comprehensive, detailed PRD
-- Save file with proper sequential numbering in `/tasks/` directory
+- Save file with proper sequential numbering in `/prds/` directory
 - Label every functional requirement with an FR ID (FR-1, FR-2, …) and ensure each acceptance criterion references at least one FR ID.
 - Keep acceptance criteria concrete and testable; avoid ambiguous language.
 - Capture Non-Functional Requirements (NFR-1, NFR-2, …) and ensure they are measurable; derive tests or checks for them.

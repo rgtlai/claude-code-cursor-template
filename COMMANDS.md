@@ -16,10 +16,16 @@ Note on Template vs. Application Docs
 Provides senior-level architectural guidance by synthesizing insights from multiple specialist perspectives including systems design, technology strategy, scalability, and risk analysis. Use this when you need high-level architectural decisions, design recommendations, or guidance on complex technical questions without writing code.
 
 #### `@create-prd`
-Generates comprehensive Product Requirements Documents for new features through structured questioning. The command walks you through gathering requirements about goals, user stories, acceptance criteria, and scope, then produces a detailed PRD saved in `/tasks/` with sequential numbering. Use this at the start of any new feature to document requirements before implementation.
+Generates comprehensive Product Requirements Documents for new features through structured questioning. The command walks you through gathering requirements about goals, user stories, acceptance criteria, and scope, then produces a detailed PRD saved in `/prds/` with sequential numbering. Use this at the start of any new feature to document requirements before implementation.
 
 #### `@generate-tasks`
-Breaks down a PRD into actionable task lists with relevant files and sub-tasks suitable for junior developers. It analyzes both the PRD and existing codebase to create structured tasks in two phases: first generating parent tasks for approval, then detailed sub-tasks. Use this after creating a PRD to plan the implementation work.
+Breaks down a PRD into actionable task lists with relevant files and sub-tasks suitable for junior developers. It analyzes both the PRD and existing codebase to create structured tasks in two phases: first generating parent tasks for approval, then detailed sub-tasks. Use this after creating a PRD to plan the implementation work. After generating a tasks file, it updates a global index at `tasks/_index.md` to track cross‑PRD dependencies and readiness.
+
+#### `@import-prds`
+Imports a single spec/bundle file containing multiple features and splits it into draft PRDs under `/prd-bundle/`, deriving a preliminary dependency graph and index. Drafts are then finalized via `@create-prd` into `/prds/` before generating tasks.
+
+#### `@migrate-project-structure`
+Migrates an existing repository to the new PRD → Tasks workflow. Normalizes PRDs in `/prds/`, ensures each `tasks-[prd].md` includes Task Dependencies and a “Blocked/Prereqs” table (placed after “Risks & Assumptions”), and creates/updates `tasks/_index.md` to consolidate global dependencies and readiness. Supports dry-run and apply modes with plan/diff previews.
 
 #### `@process-task-list`
 Systematically executes tasks from a task list file one sub-task at a time with user approval between each step. It maintains progress tracking, runs tests after completing parent tasks, and creates properly formatted commits. Use this to work through generated task lists in a controlled, methodical manner.
@@ -92,6 +98,14 @@ Audits an existing architecture or flow diagram—often Mermaid—against the cu
 3. `@generate-scaffold` - Create project structure
 4. `@code` - Implement core features
 5. `@flow-chart-diagram` - Document architecture
+
+### Migration Quickstart
+Use this when adopting the new PRD → Tasks workflow in an existing repo.
+1. `@import-prds` (optional) - Split a single features/specs file into draft PRDs under `/prd-bundle/`
+2. `@create-prd` - Finalize each PRD into `/prds/` via qualifying questions
+3. `@generate-tasks` - Create `tasks-[prd].md`, add Task Dependencies + Blocked/Prereqs table, and update `tasks/_index.md`
+4. `@migrate-project-structure` (dry-run) - Plan and preview normalization and global index updates
+5. `@migrate-project-structure apply` - Apply approved changes; then proceed with `@process-task-list` on unblocked items
 
 ## Tips
 

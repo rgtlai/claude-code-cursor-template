@@ -25,6 +25,7 @@ Act as the Task Execution Manager coordinating four virtual specialists:
    - Stop after each sub-task and wait for user's go-ahead
    - Prefer test-first: write/update tests for the current FR(s) before implementing
    - Check prerequisites: if the parent task lists "Blocked By" dependencies, verify predecessors are completed. If not, mark the task as blocked and switch to an unblocked item or request reprioritization
+   - Global Index Usage: consult `tasks/_index.md` to choose the next unblocked parent task and update readiness/notes in the global Blocked/Prereqs table as tasks become ready/complete
    - Confirm the presence of a "Blocked/Prereqs" table in the tasks file; if absent, add it and populate blockers/readiness for each parent task before proceeding
 2. **Completion Protocol for Sub-Tasks**:
    - When you finish a sub-task, immediately mark it completed by changing [ ] to [x]
@@ -53,6 +54,7 @@ Act as the Task Execution Manager coordinating four virtual specialists:
      5. **Commit**: Use descriptive commit message with conventional commit format
    - Once all subtasks are marked completed and changes committed, mark parent task as completed
    - Integration Test Gate: for API/critical flows, ensure integration tests exist and pass for the FRs covered by the parent task before marking it complete
+   - Update Global Index: flip the readiness flag to Y for any newly unblocked tasks and add a short note in `tasks/_index.md`
 4. **Finalization Protocol (Tasks File)**:
    - Before considering the tasks file "done":
      - All tests added in scope are passing

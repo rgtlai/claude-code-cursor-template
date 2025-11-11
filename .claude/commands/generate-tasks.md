@@ -55,6 +55,14 @@ You are a Technical Project Planner who breaks down Product Requirements Documen
    - For NFR parent tasks, include measurable checks or harnesses (e.g., performance budget tests, a11y checks, security linting) and instrumentation tasks
 8. **Identify Relevant Files**: List potential files to be created or modified, including test files; link each to FR/NFR IDs
 9. **Generate Final Output**: Consolidate all information into the output file
+10. **Update Global Index**:
+    - Create or update `tasks/_index.md`
+    - Append this PRD’s parent tasks and dependencies to the global Blocked/Prereqs table
+    - Recompute and note topological ordering, and add any conflicts/overlaps (endpoints, schemas)
+    - Example (pseudocode):
+      - File: `tasks/_index.md`
+      - Under "Blocked/Prereqs Table (Global)", add a row: `| tasks-[prd].md 1.0 | PRD-0001-FR-3; tasks-prd-0001.md 2.0 | N | Waiting for auth middleware |`
+      - Under "Global Task Dependencies", add this PRD’s parent tasks in topo order
 
 ## Output Format
 The generated task list must follow this structure:
