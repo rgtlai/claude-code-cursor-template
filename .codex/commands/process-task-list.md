@@ -24,6 +24,8 @@ Act as the Task Execution Manager coordinating four virtual specialists:
    - Do NOT start next sub-task until you ask user for permission and they say "yes" or "y"
    - Stop after each sub-task and wait for user's go-ahead
    - Prefer test-first: write/update tests for the current FR(s) before implementing
+   - Check prerequisites: if the parent task lists "Blocked By" dependencies, verify predecessors are completed. If not, mark the task as blocked and switch to an unblocked item or request reprioritization
+   - Confirm the presence of a "Blocked/Prereqs" table in the tasks file; if absent, add it and populate blockers/readiness for each parent task before proceeding
 2. **Completion Protocol for Sub-Tasks**:
    - When you finish a sub-task, immediately mark it completed by changing [ ] to [x]
    - Update task list file after finishing significant work
@@ -50,17 +52,20 @@ Act as the Task Execution Manager coordinating four virtual specialists:
      4. **Clean up**: Remove any temporary files and temporary code before committing
      5. **Commit**: Use descriptive commit message with conventional commit format
    - Once all subtasks are marked completed and changes committed, mark parent task as completed
+   - Integration Test Gate: for API/critical flows, ensure integration tests exist and pass for the FRs covered by the parent task before marking it complete
 4. **Finalization Protocol (Tasks File)**:
    - Before considering the tasks file "done":
      - All tests added in scope are passing
      - Any remaining skipped tests are listed in "Deferred/Skipped Tests" with reasons and future task references
      - Revisit previously skipped tests; un-skip if their blockers were completed
+   - If API tasks were included, verify the "API Implementation Checklist" items (auth context injection, multi-tenancy filters, RBAC, serialization, correct 404/422 behavior) before closing parent tasks
 5. **Task List Maintenance**:
    - Mark tasks and subtasks as completed ([x]) per protocol above
    - Add new tasks as they emerge
    - Maintain "Relevant Files" section with every file created or modified
    - Give each file a one-line description of its purpose
    - When creating new modules/components, consider using scaffolding commands (e.g., `@generate-scaffold`, `@create-scaffold-template`) for consistency
+   - Keep a "Blocked/Prerequisites" note listing tasks deferred due to unmet dependencies; revisit and unblock when predecessors complete
 
 ## Deliverables
 - **Updated Task List** — file with current completion state

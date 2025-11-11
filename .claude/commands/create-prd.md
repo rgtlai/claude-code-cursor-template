@@ -56,21 +56,24 @@ Generate PRD with the following structure:
 7. **Non-Functional Requirements (NFR)** – Numbered and uniquely labeled (NFR-1, NFR-2, …) for performance, security, privacy, accessibility, reliability, compliance, and scalability. Each NFR should be measurable and testable.
 8. **Design Considerations** (Optional) – UI/UX requirements, mockups, relevant components
 9. **Technical Considerations** (Optional) – Constraints, dependencies, integration points
-10. **Test Strategy** – How the feature will be validated:
+10. **Dependencies & Predecessors** – Map FR/NFR items to upstream dependencies (other FRs/features, services, data models, or infrastructure). For each FR, list predecessors that must be completed first
+11. **Test Strategy** – How the feature will be validated:
    - Test types: unit, integration, e2e (as applicable)
    - Test locations and naming conventions
    - Data/setup requirements and fixtures
    - Performance or security checks (if applicable)
-11. **Feature Flags & Rollout** – Whether this ships behind a flag, rollout plan, monitoring during rollout, and safe backout steps.
-12. **Data Migration Strategy** (If applicable) – Forward/backward compatibility, idempotent migrations, seed/backfill plan, and rollback plan.
-13. **Operational Readiness** – Observability and ops requirements: logging, metrics, tracing, dashboards, alerts, SLOs, runbook updates.
-14. **Traceability** – Map FR and NFR IDs → tasks → test files/specs.
-15. **Definition of Done (DoD)** – Must include:
+12. **Feature Flags & Rollout** – Whether this ships behind a flag, rollout plan, monitoring during rollout, and safe backout steps.
+13. **Data Migration Strategy** (If applicable) – Forward/backward compatibility, idempotent migrations, seed/backfill plan, and rollback plan.
+14. **Operational Readiness** – Observability and ops requirements: logging, metrics, tracing, dashboards, alerts, SLOs, runbook updates.
+15. **Reference Implementations** (Optional) – Existing modules/APIs/patterns to follow (e.g., a previously correct endpoint). Link files/lines
+16. **Traceability** – Map FR and NFR IDs → tasks → test files/specs.
+17. **Definition of Done (DoD)** – Must include:
    - Tests written and passing for all implemented FRs
+   - Integration tests for critical flows (e.g., APIs, multi-service interactions) written and passing
    - No unresolved or unexplained skipped tests for current scope
    - Documentation and update notes completed
-16. **Success Metrics** – Measurable outcomes (e.g., "Increase user engagement by 10%")
-17. **Open Questions** – Remaining clarifications needed
+18. **Success Metrics** – Measurable outcomes (e.g., "Increase user engagement by 10%")
+19. **Open Questions** – Remaining clarifications needed
 
 Keep requirements explicit, unambiguous, and accessible to junior developers.
 

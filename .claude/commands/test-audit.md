@@ -4,7 +4,7 @@ argument-hint: [[unit|integration|e2e|all] [path]]
 ---
 
 ## Usage
-`@test-audit.md [[unit|integration|e2e|all] [path] [completed-only|all-tasks]]`
+`@test-audit.md [[unit|integration|e2e|all] [path] [completed-only|all-tasks] [with-run|full-run]]`
 
 ## Examples
 - `@test-audit.md` - Prompts for test type, audits entire codebase
@@ -25,6 +25,7 @@ argument-hint: [[unit|integration|e2e|all] [path]]
 - Use TodoWrite tool to track audit progress across multiple test categories
 - PRDs in `/tasks/` define Functional Requirements (FR-1, FR-2, …) and may define Non-Functional Requirements (NFR-1, NFR-2, …)
 - Tasks files `tasks-[prd-file-name].md` include a "Test Plan Summary" and a "Deferred/Skipped Tests" section that should align to FR/NFR IDs
+ - Optional run mode: add `with-run` to execute targeted tests for the Implemented FR/NFR set (or path), or `full-run` to execute the full suite. Results are summarized and any failures/errors become explicit actions to fix
 
 ## Your Role
 You are the Test Audit Specialist responsible for comprehensive test analysis against project specifications, features, and design. You systematically review:
@@ -38,6 +39,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
 1. **Argument Parsing**:
    - Parse $ARGUMENTS to extract test category and optional path
    - Parse optional scope token: `completed-only` (default) or `all-tasks`
+   - Parse optional run mode token: `with-run` (targeted) or `full-run` (entire suite); default is no execution
    - **Identify test category**: Look for keywords: unit, integration, e2e, or all
    - **Identify path**: Look for directory/file path patterns (contains `/` or looks like a folder structure)
    - **Handle flexible order**: Arguments can be in any order (e.g., "unit src/auth" or "src/auth unit")
@@ -112,11 +114,22 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
    - Audit Deferred/Skipped Tests:
      - Verify each skipped test has a reason `BLOCKED_BY_TASK [parent.subtask]` and FR/NFR references
      - Flag skipped tests lacking reason or still skipped after blockers completed
-   - Quality Gates & E2E/Smoke (informational; run if available):
-     - Lint, type-check, format; security scan; coverage threshold/no-regression; migrations check
-     - Minimal E2E/Smoke covering core happy path(s)
+   - Quality Gates & E2E/Smoke (informational; run if available or when in run mode as appropriate):
+      - Lint, type-check, format; security scan; coverage threshold/no-regression; migrations check
+      - Minimal E2E/Smoke covering core happy path(s)
+5. **Run Tests (Optional: with-run | full-run)**
+   - If `with-run`: execute targeted tests associated with the Implemented FR/NFR set or the provided path/category
+   - If `full-run`: execute the project’s full test suite using the configured test runner(s)
+   - Capture failing tests (file, name, error), errors/timeouts, and a short summary; include in "Test Execution Summary" and "Test Failures (Run Mode)"
+   - Classify failures: if a failure stems from missing feature code or API integration that is not yet implemented, recommend converting the test to a skipped test with a clear comment, using `BLOCKED_BY_TASK x.y` and FR/NFR references, and add it to the tasks file's Deferred/Skipped Tests. If the failure indicates a bug in existing code, recommend fixing the implementation or test accordingly
 
-5. **Source Code Verification** (Optional):
+   Run Mode Examples (see COMMANDS.md “Targeted Test Runs and Skip Hygiene”):
+   - Pytest targeted: `pytest path/to/test.py -k FR_3`
+   - Jest targeted: `npx jest path/to/file.test.ts -t "FR-3"`
+   - Rails targeted: `bin/rails test test/models/user_test.rb:42`
+   - Full-run examples: `pytest`, `npx jest`, `bin/rails test`
+
+6. **Source Code Verification** (Optional):
    - If test failures or source code issues are suspected:
      - Create `/diagnose` folder in root directory
      - Write minimal reproduction scripts to verify behavior
@@ -124,7 +137,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - Document any source code issues found
    - Include source code issues in TEST_AUDIT.md report
 
-6. **Generate Audit Report**:
+7. **Generate Audit Report**:
    - Check if `TEST_AUDIT.md` exists in root directory
    - If exists: Prepend new audit to top with clear separation
    - If not: Create new file with audit report
@@ -245,6 +258,7 @@ Issues found in source code during audit:
 ### 7. Deferred/Skipped Tests Review
 - `path/to/pending_fr5.spec.ts` — reason: BLOCKED_BY_TASK 3.2 (FR-5). Status: [still blocked|unblocked]
 - [List any skipped tests missing reasons or FR/NFR mapping]
+- Identify skipped tests where blockers appear resolved (e.g., related tasks completed or required code now present); recommend implementing the remaining code or finalizing the test and un-skipping
 
 ### 8. Quality Gates Summary (informational)
 - Lint/type/format: [pass|fail]
@@ -252,6 +266,12 @@ Issues found in source code during audit:
 - Coverage: [value]% (threshold: [value]%) — [meets|below]
 - Migrations check: [ok|issues]
 - E2E/Smoke: [pass|fail]; notes: [brief]
+
+### 9. Test Failures (Run Mode, if any)
+- Summary of failures/errors from `with-run`/`full-run`
+- List failing tests with file references and brief error notes
+- For each failure, propose an action: fix test, fix implementation (mapped to FR/NFR), or convert to a skipped test with `BLOCKED_BY_TASK x.y` (include a comment like "Feature/code not yet implemented; see task x.y") and add to Deferred/Skipped Tests in the tasks file
+- Additionally, if current skipped tests appear ready (blockers cleared), recommend implementing the necessary code or completing the test and un-skipping
 
 ## Recommendations
 

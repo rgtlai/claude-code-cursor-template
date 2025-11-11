@@ -51,12 +51,14 @@ Act as the Product Requirements Specialist coordinating insights from four virtu
 - **Non-Functional Requirements (NFR)** — labeled NFR-1, NFR-2, … for performance, security, privacy, accessibility, reliability, compliance, scalability. Each is measurable and testable.
 - **Design Considerations** (Optional) — UI/UX requirements, mockups, relevant components
 - **Technical Considerations** (Optional) — constraints, dependencies, integration points
+- **Dependencies & Predecessors** — map FR/NFR items to upstream dependencies (other FRs/features, services, data models, infrastructure). For each FR, list predecessors that must be completed first
 - **Test Strategy** — test types, locations, naming, fixtures/data setup, and any performance/security checks
 - **Feature Flags & Rollout** — flag default, rollout plan, monitoring, and backout steps
 - **Data Migration Strategy** — forward/backward compatibility, seed/backfill, rollback
 - **Operational Readiness** — logging, metrics, tracing, dashboards, alerts, SLOs, runbooks
+- **Reference Implementations** (Optional) — existing modules/APIs/patterns to follow (e.g., a previously correct endpoint). Link files/lines
 - **Traceability** — matrix mapping FR and NFR IDs → tasks → test files/specs
-- **Definition of Done (DoD)** — tests written and passing for all implemented FRs, no unexplained skips, docs updated
+- **Definition of Done (DoD)** — tests written and passing for all implemented FRs; integration tests for critical flows are written and passing; no unexplained skips; docs updated
 - **Success Metrics** — measurable outcomes (e.g., "Increase user engagement by 10%")
 - **Open Questions** — remaining clarifications needed
 
@@ -75,3 +77,5 @@ Keep requirements explicit, unambiguous, and accessible to junior developers. Fo
 - Include migration/backfill notes and operational readiness (observability and runbooks).
 - Next step after saving the PRD: run `@generate-tasks <PATH_TO_THIS_PRD>` to produce the tasks file.
  - Never assume architecture: when stack or architecture choices are needed, present options with trade-offs and request explicit user confirmation before documenting
+ - Document dependencies: for each FR/NFR, list predecessors (other FRs/features/services) and any external dependencies that must be ready first.
+ - For PRDs defining APIs, include an API Implementation Checklist covering: auth context extraction (avoid sensitive fields in request body), multi-tenancy filtering, RBAC checks, JSON/datetime serialization, proper 404 vs 422 behavior, and integration tests.
