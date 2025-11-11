@@ -38,3 +38,9 @@ Deliver performance improvements efficiently:
 5. **Next Actions** – validation and monitoring tasks
 
 Focus on measurable improvements. Show before/after metrics when possible.
+
+## Important Guidelines
+- Tie optimization work to NFR IDs (e.g., NFR-1 Performance). Update the tasks file's Test Plan Summary with any new performance checks.
+- Establish baseline metrics and collect after-change metrics; include commands/instructions for reproducible measurement.
+- Apply quality gates and minimal E2E/smoke to avoid regressions.
+- Maintain FR/NFR traceability and skip hygiene for any tests impacted by performance changes.

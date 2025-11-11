@@ -36,3 +36,6 @@ Keep the discussion grounded in data. Report metrics before/after when possible.
 - Use the planning tool when multiple avenues must be explored
 - Do not sacrifice correctness for speed; call out any risky trade-offs explicitly
 - Add lightweight comments only when they clarify non-obvious optimizations
+- Tie work to NFR IDs (e.g., NFR-1 Performance) and update the tasks file's Test Plan Summary with any new performance checks.
+- Record baseline and after metrics with reproducible steps.
+- Apply quality gates and minimal E2E/smoke to catch regressions.

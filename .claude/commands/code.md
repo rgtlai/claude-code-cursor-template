@@ -38,3 +38,10 @@ Deliver working code with minimal explanation:
 5. **Next Actions** – concrete follow-up tasks if any
 
 Focus on code delivery. Only explain complex decisions when necessary.
+
+## Important Guidelines
+- If a PRD/tasks file exists, update the appropriate task and follow `@process-task-list.md` rather than making ad-hoc changes.
+- Maintain FR/NFR traceability: reference FR/NFR IDs in test names/comments and commit messages as applicable.
+- Follow skip hygiene: if a test must be skipped due to a future task, use `BLOCKED_BY_TASK x.y` with FR/NFR references and add it to "Deferred/Skipped Tests" in the tasks file.
+- Targeted runs during work: `pytest path/to/test.py -k FR_3`, `npx jest path/to/file.test.ts -t "FR-3"`, `bin/rails test path/to/test.rb`.
+- Apply quality gates before finalizing: lint, type-check, format, security scan, coverage thresholds, migrations checks, and minimal E2E/smoke where available.

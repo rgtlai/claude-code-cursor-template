@@ -36,3 +36,6 @@ Keep the reply implementation-focused. Provide code snippets only when they aid 
 - Use planning when the test effort spans multiple layers or suites
 - Maintain existing conventions (naming, folder structure, helper utilities)
 - Flag flaky areas or data dependencies so the team can address them
+- Maintain FR/NFR traceability in test names/comments and reference acceptance criteria.
+- Enforce skip hygiene: use `BLOCKED_BY_TASK x.y` with FR/NFR and track in the tasks file's Deferred/Skipped Tests.
+- Provide targeted run examples and update the tasks file Test Plan Summary when adding tests.

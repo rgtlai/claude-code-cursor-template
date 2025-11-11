@@ -36,3 +36,6 @@ Keep explanations pragmatic and goal-oriented. Reference files with clickable pa
 - Use planning for anything beyond trivial edits
 - Avoid unnecessary churn; prefer minimal, focused changes
 - Preserve or improve existing test coverage; add tests when refactors enable them
+- Avoid functional changes during refactors; if necessary, route changes through PRD/tasks as feature work.
+- Maintain FR/NFR traceability; un-skip tests that become valid and update Deferred/Skipped Tests accordingly.
+- Use targeted runs and quality gates at checkpoints to ensure behaviour parity.

@@ -36,3 +36,7 @@ Adopt a code review voice: specific, evidence-based, and ordered by severity. Fo
 - Use the planning tool when reviewing large or multi-module changes
 - Avoid rewrites; instead, describe recommended changes unless explicitly asked to implement them
 - Capture open questions when context is missing before issuing a final verdict
+- Verify FR/NFR traceability and test adequacy; flag missing mappings.
+- Check skip hygiene (`BLOCKED_BY_TASK x.y` + FR/NFR) and ensure deferred tests are tracked in tasks.
+- Require updates to Test Plan Summary and Deferred/Skipped Tests when tests are added/changed.
+- Recommend running quality gates (lint, type-check, format, security scan, coverage, migrations) before approval.

@@ -4,7 +4,7 @@ argument-hint: [[unit|integration|e2e|all] [path]]
 ---
 
 ## Usage
-`@test-audit.md [[unit|integration|e2e|all] [path]]`
+`@test-audit.md [[unit|integration|e2e|all] [path] [completed-only|all-tasks]]`
 
 ## Examples
 - `@test-audit.md` - Prompts for test type, audits entire codebase
@@ -17,11 +17,14 @@ argument-hint: [[unit|integration|e2e|all] [path]]
 ## Context
 - Test category to audit: Parsed from $ARGUMENTS (unit/integration/e2e/all)
 - Optional path restriction: Parsed from $ARGUMENTS (if provided, only audit tests in that folder)
+- Task scope: By default, audit only FR/NFR linked to completed tasks/subtasks ([x]) in `tasks-[prd-file-name].md`. Include pending work by adding `all-tasks`.
 - **Dual-purpose audit**: Verifies BOTH test coverage AND test correctness
 - Compares existing tests against current specification sheets, feature documentation, and design requirements
 - Identifies missing tests, incorrect test assertions, and discrepancies with specs/features/design
 - Generates or appends to `TEST_AUDIT.md` report in root directory
 - Use TodoWrite tool to track audit progress across multiple test categories
+- PRDs in `/tasks/` define Functional Requirements (FR-1, FR-2, …) and may define Non-Functional Requirements (NFR-1, NFR-2, …)
+- Tasks files `tasks-[prd-file-name].md` include a "Test Plan Summary" and a "Deferred/Skipped Tests" section that should align to FR/NFR IDs
 
 ## Your Role
 You are the Test Audit Specialist responsible for comprehensive test analysis against project specifications, features, and design. You systematically review:
@@ -29,10 +32,12 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
 2. **Test Correctness**: Do tests validate the RIGHT behavior as defined in specs/features/design?
 3. **Test Accuracy**: Do test assertions match expected outcomes from specifications?
 4. **Alignment**: Are tests in sync with current specs, features, and design decisions?
+5. **Traceability**: Are tests mapped to PRD FR/NFR IDs, and do all FR/NFRs have corresponding tests or checks?
 
 ## Process
 1. **Argument Parsing**:
    - Parse $ARGUMENTS to extract test category and optional path
+   - Parse optional scope token: `completed-only` (default) or `all-tasks`
    - **Identify test category**: Look for keywords: unit, integration, e2e, or all
    - **Identify path**: Look for directory/file path patterns (contains `/` or looks like a folder structure)
    - **Handle flexible order**: Arguments can be in any order (e.g., "unit src/auth" or "src/auth unit")
@@ -46,7 +51,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
    - For "all", audit each category (unit, integration, e2e) separately
 
 2. **Locate Specifications, Features, and Design Documents**:
-   - Check for CLAUDE.md file in root directory for spec and feature references
+   - Check for the project's CLAUDE.md in the target application's root for stack, spec, and feature references
    - Look for common spec file locations:
      - `/docs/specifications/`, `/specs/`, `/requirements/`
      - Files like: `SPECS.md`, `REQUIREMENTS.md`, `FEATURES.md`, `CHANGELOG.md`
@@ -62,6 +67,14 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - Look for "CURRENT", "LATEST", or similar indicators
      - Note any contradictions between documents
    - If specs/design cannot be located or are ambiguous, ask user: "I found [X, Y, Z]. Which file(s) contain the current specs, features, and design requirements?"
+   - Extract FR/NFR IDs and acceptance criteria from PRD(s) in `/tasks/`
+   - Locate corresponding `tasks-[prd-file-name].md` and parse:
+     - "Test Plan Summary" (expected tests for each FR/NFR)
+     - "Deferred/Skipped Tests" (blocked tests with reasons using BLOCKED_BY_TASK)
+     - Task completion state: which parent tasks/subtasks are marked completed ([x]) and their mapped FR/NFR
+   - Derive Implemented FR/NFR Set:
+     - If scope is `completed-only` (default): implemented = FR/NFR referenced by any completed task/subtask
+     - If scope is `all-tasks`: implemented = all FR/NFR in PRD (completed + pending)
 
 3. **Identify Test Locations**:
    - **If path restriction provided**:
@@ -92,6 +105,16 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - **Incomplete Tests**: Tests that don't fully cover spec requirements or edge cases
      - **Ambiguous Tests**: Tests with unclear purpose or poor descriptions
      - **False Positives**: Tests that pass but don't actually validate correct behavior
+   - Build FR/NFR Traceability Matrix:
+     - Map each FR and NFR ID to test files/specs and record status (pass/fail/skip)
+     - Identify orphan tests (no FR/NFR mapping) and recommend mapping or removal
+     - Identify FR/NFR with no mapped tests (coverage gaps) — only for the Implemented FR/NFR Set
+   - Audit Deferred/Skipped Tests:
+     - Verify each skipped test has a reason `BLOCKED_BY_TASK [parent.subtask]` and FR/NFR references
+     - Flag skipped tests lacking reason or still skipped after blockers completed
+   - Quality Gates & E2E/Smoke (informational; run if available):
+     - Lint, type-check, format; security scan; coverage threshold/no-regression; migrations check
+     - Minimal E2E/Smoke covering core happy path(s)
 
 5. **Source Code Verification** (Optional):
    - If test failures or source code issues are suspected:
@@ -127,6 +150,7 @@ Each audit entry should follow this format:
 **Date**: YYYY-MM-DD HH:MM
 **Category**: [unit|integration|e2e|all]
 **Scope**: [Entire codebase | path/to/folder]
+**Task Scope**: [Completed-only | All-tasks]
 **Auditor**: Claude Code Test Audit
 
 ## Summary
@@ -139,8 +163,28 @@ Each audit entry should follow this format:
 - **Test Coverage**: [percentage]%
 - **Test Correctness**: [percentage]%
 - **Critical Issues**: [number]
+ - **FRs Audited**: [number]; **FRs Missing Tests**: [number]
+ - **NFRs Audited**: [number]; **NFRs Missing Checks**: [number]
+ - **Deferred/Skipped Tests**: [count]; **Orphan Tests**: [count]
 
 ## Findings
+
+### 0. FR/NFR Traceability Matrix
+For each FR/NFR, list mapped tests/specs and status:
+
+- FR-1: tests: [`path/to/fr1.spec.ts` (pass), `path/to/fr1.integration.ts` (skip: BLOCKED_BY_TASK 3.2)]
+- FR-2: tests: [`path/to/fr2.spec.ts` (fail)]
+- NFR-1 (Performance): checks: [`tests/perf/budget.test.js` (pass)]
+- NFR-2 (Accessibility): checks: [`tests/a11y/homepage.test.ts` (pass)]
+
+Unmapped (Gaps): FR-[ids]; NFR-[ids]
+Orphan tests (no FR/NFR mapping): [`tests/unit/utils.spec.ts`]
+
+### 0.1 Pending FR/NFR (Not Implemented Yet)
+Only listed when scope is Completed-only. These are FR/NFR with no completed tasks; they are not counted as missing tests:
+
+- FR-[ids]
+- NFR-[ids]
 
 ### 1. Missing Test Coverage
 Features/specs/design requirements without corresponding tests:
@@ -198,6 +242,17 @@ Issues found in source code during audit:
   - Relation to specs: [how it deviates from spec]
   - Recommended fix: [description]
 
+### 7. Deferred/Skipped Tests Review
+- `path/to/pending_fr5.spec.ts` — reason: BLOCKED_BY_TASK 3.2 (FR-5). Status: [still blocked|unblocked]
+- [List any skipped tests missing reasons or FR/NFR mapping]
+
+### 8. Quality Gates Summary (informational)
+- Lint/type/format: [pass|fail]
+- Security scan: [pass|fail]
+- Coverage: [value]% (threshold: [value]%) — [meets|below]
+- Migrations check: [ok|issues]
+- E2E/Smoke: [pass|fail]; notes: [brief]
+
 ## Recommendations
 
 ### Immediate Actions (Critical Priority)
@@ -230,6 +285,9 @@ Issues found in source code during audit:
 1. [Concrete action items]
 2. [Files to update]
 3. [People to consult if needed]
+4. Update `tasks-[prd-file-name].md`:
+   - Add missing tests under appropriate tasks and update "Test Plan Summary" with FR/NFR mappings
+   - Move resolved items out of "Deferred/Skipped Tests"; un-skip tests where blockers are complete
 
 ---
 
@@ -241,8 +299,8 @@ Issues found in source code during audit:
 ### Specification, Feature, and Design Analysis
 - **Always verify spec currency**: Look for dates, versions, changelog entries
 - **Document contradictions**: If specs/features/design conflict, list all versions and ask for clarification
-- **Check multiple sources**: PRDs in `/tasks/`, docs in `/docs/`, CLAUDE.md, README.md, design files
-- **Trace requirements**: Link each test (or missing test) to specific spec/feature/design requirement
+- **Check multiple sources**: PRDs in `/tasks/`, docs in `/docs/`, the project's CLAUDE.md, README.md, design files
+- **Trace requirements**: Link each test (or missing test) to PRD FR/NFR IDs and acceptance criteria
 - **Validate correctness**: Don't just check if tests exist—verify they test the RIGHT thing per specs
 - **Cross-reference design**: Ensure test data, scenarios, and edge cases match design specifications
 - **Check acceptance criteria**: Map test assertions to acceptance criteria from specs/PRDs
@@ -266,6 +324,9 @@ Issues found in source code during audit:
   - High: Missing tests for core features or wrong test logic
   - Medium: Incomplete tests or ambiguous test coverage
   - Low: Minor improvements or edge case additions
+ - Enforce skip hygiene: Skipped tests must include `BLOCKED_BY_TASK [parent.subtask]` and FR/NFR references
+ - Identify orphans: Tests with no FR/NFR mapping should be re-mapped (or justified) or removed
+ - Targeted runs: Use `pytest path/to/test.py -k FR_3`, `npx jest path/to/test.ts -t "FR-3"`, or `bin/rails test path/to/test.rb` for spot verification
 
 ### Report Formatting
 - **Consistent structure**: Follow the output format exactly
@@ -289,3 +350,5 @@ Issues found in source code during audit:
 - Any code issues discovered are documented but NOT fixed (use @debug.md or @code.md for fixes)
 - Tests with incorrect assertions are just as critical as missing tests
 - A passing test suite doesn't mean correctness—tests must validate spec requirements accurately
+ - Traceability is required; if PRDs lack FR/NFR IDs, request adding them before a full audit
+ - Align audit recommendations with process-task-list quality gates and finalization protocol

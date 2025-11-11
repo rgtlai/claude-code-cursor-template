@@ -38,3 +38,9 @@ Deliver comprehensive test coverage:
 5. **Next Actions** – additional testing needs if any
 
 Focus on test code delivery. Keep explanations minimal.
+
+## Important Guidelines
+- Maintain FR/NFR traceability in test names/comments; link scenarios to acceptance criteria.
+- Follow skip hygiene: use `BLOCKED_BY_TASK x.y` with FR/NFR references and list skipped tests in the tasks file's Deferred/Skipped Tests.
+- Provide targeted run examples with your tests: `pytest path/to/test.py -k FR_3`, `npx jest path/to/file.test.ts -t "FR-3"`, `bin/rails test path/to/test.rb`.
+- If a PRD/tasks file exists, update the tasks file (Test Plan Summary and Deferred/Skipped Tests) alongside adding tests.

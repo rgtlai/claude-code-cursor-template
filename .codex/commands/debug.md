@@ -35,3 +35,7 @@ Stay direct and results-oriented. Provide only the necessary context before pres
 - Use the planning tool when debugging spans multiple hypotheses or components
 - Create temporary diagnostics only when essential, and remove them afterward unless the user wants them retained
 - Prefer editing existing files over large rewrites; maintain project conventions
+- Add or update a regression test mapped to relevant FR/NFR. If fixes depend on future tasks, skip tests with `BLOCKED_BY_TASK x.y` and reference FR/NFR; list them in Deferred/Skipped Tests in the tasks file.
+- Targeted runs: `pytest path/to/test.py -k FR_3`, `npx jest path/to/file.test.ts -t "FR-3"`, `bin/rails test path/to/test.rb`.
+- Apply quality gates before finalization: lint, type-check, format, security scan, coverage thresholds, migrations checks, and minimal E2E/smoke if available.
+- If a PRD/tasks file exists, prefer updating the task and continue via `@process-task-list`.

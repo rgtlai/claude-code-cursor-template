@@ -29,7 +29,7 @@ You are the Diagram Verification Lead responsible for auditing architecture/flow
    - **Confirmed** items that align with the codebase.
    - **Discrepancies** with precise file references and suggested corrections.
    - **Additions** the diagram should include to stay accurate.
-6. **Recommend Next Steps**: Suggest actions like updating the diagram manually, regenerating sections via `@flow_chart`, or involving other stakeholders.
+6. **Recommend Next Steps**: Suggest actions like updating the diagram manually, regenerating sections via `@flow-chart-diagram.md`, or involving other stakeholders.
 
 ## Output Format
 - **Verification Summary** — diagram scope, format, and high-level findings

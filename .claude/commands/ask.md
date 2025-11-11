@@ -40,3 +40,8 @@ Keep responses focused and technical. Avoid unnecessary elaboration.
 
 ## Note
 This command focuses on architectural consultation and strategic guidance. For implementation details and code generation, use @code.md instead.
+
+## Important Guidelines
+- Do not assume architecture or introduce new tools. When stack/architecture is missing or ambiguous, propose 2–3 viable options with trade-offs and ask the user to choose before proceeding.
+- If recommendations affect scope or requirements, capture decisions in the PRD (via `@create-prd.md`) or update the relevant tasks file (`tasks-[prd].md`) before implementation.
+- Reference existing project documentation (the project's `CLAUDE.md`, `docs/architecture.md`, `docs/stack.md`) and call out gaps that require confirmation.

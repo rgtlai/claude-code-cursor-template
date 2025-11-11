@@ -45,3 +45,6 @@ Provide concise deliverables:
 4. **Observations** – notable patterns or improvement suggestions
 
 Keep it actionable and concise. You MUST create the markdown file(s) - do not just output content in chat.
+ 
+## Related Commands
+- To validate an existing or newly generated diagram against the codebase, run `@verify-diagram.md <PATH_TO_DIAGRAM>`.

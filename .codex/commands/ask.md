@@ -36,3 +36,5 @@ Follow Codex CLI answer norms: stay concise, lead with the most critical guidanc
 - Prefer reasoning about the architecture; defer code generation to `@code`
 - Use the planning tool when the request requires substantial multi-step analysis
 - Reference files with absolute or workspace-relative paths when needed
+- Never assume architecture or introduce tools: when stack/architecture is unclear, present 2–3 options with trade-offs and pause for explicit user selection.
+- If outcomes affect requirements or scope, capture decisions in the PRD (`@create-prd`) or update the tasks file before implementation.

@@ -37,3 +37,9 @@ Deliver fixes efficiently:
 4. **Prevention** – steps to prevent recurrence (if applicable)
 
 Be direct. Focus on fixing the issue, not extensive documentation.
+
+## Important Guidelines
+- Add or update a regression test mapped to relevant FR/NFR where appropriate. If the fix depends on future tasks, mark affected tests as skipped with `BLOCKED_BY_TASK x.y` and reference FR/NFR; list them in "Deferred/Skipped Tests" in the tasks file.
+- Run targeted tests while iterating: `pytest path/to/test.py -k FR_3`, `npx jest path/to/file.test.ts -t "FR-3"`, `bin/rails test path/to/test.rb`.
+- Apply quality gates before finalizing: lint, type-check, format, security scan, coverage thresholds, and migrations checks as applicable.
+- If a PRD/tasks file exists, update the relevant task and follow `@process-task-list.md`.

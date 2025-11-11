@@ -2,6 +2,12 @@
 
 This repository contains custom commands for AI coding assistants (Claude Code and Codex CLI). Each command is available in both `.claude/commands/` and `.codex/commands/` directories with equivalent functionality adapted for each platform.
 
+Note on Template vs. Application Docs
+- This repo is a command template. It does not include an application-level `CLAUDE.md`.
+- Many commands look for the project's own `CLAUDE.md` (in the target application repository) and optional docs under `docs/` (e.g., `docs/architecture.md`, `docs/stack.md`).
+- If those docs are missing or ambiguous, commands will ask clarifying questions and will not assume architecture or introduce tools without explicit approval.
+- Usage, behavior, and expectations for these commands are documented here in `COMMANDS.md` and within each command file.
+
 ## Available Commands
 
 ### Architecture & Planning
@@ -94,3 +100,35 @@ Audits an existing architecture or flow diagram—often Mermaid—against the cu
 - Commands preserve existing conventions and prefer minimal changes
 - File paths should be workspace-relative for best results
 - Commands coordinate virtual specialist teams for comprehensive analysis
+
+## Targeted Test Runs and Skip Hygiene
+
+Use these quick commands and patterns across languages and frameworks to run only what matters and keep skips traceable to tasks and requirements.
+
+### Targeted Test Runs
+- Pytest: `pytest path/to/test.py -k FR_3`
+- Jest: `npx jest path/to/file.test.ts -t "FR-3"`
+- Mocha: `npx mocha 'test/**/*.spec.ts' -g "FR-3"`
+- RSpec: `bundle exec rspec spec/path/to_spec.rb --example "FR-3"`
+- Rails test: `bin/rails test test/models/user_test.rb:42`
+- Go: `go test ./... -run FR_3`
+- Playwright: `npx playwright test -g "FR-3"`
+- Cypress (with grep): `npx cypress run --spec "cypress/e2e/path.cy.ts" --env grep=FR-3`
+
+Tip: Use consistent FR/NFR tokens (e.g., `FR-3` or `FR_3`) in test names or descriptions to make targeted filters easy.
+
+### Skip Hygiene (BLOCKED_BY_TASK)
+- Pytest: `@pytest.mark.skip(reason="BLOCKED_BY_TASK 3.2 FR-5")`
+- Jest/Mocha: `test.skip('FR-5 scenario', ...) // BLOCKED_BY_TASK 3.2`
+- RSpec: `pending 'BLOCKED_BY_TASK 3.2 FR-5'`
+- Go: `t.Skip("BLOCKED_BY_TASK 3.2 FR-5")`
+
+Always add skipped tests to the tasks file under "Deferred/Skipped Tests" with the blocker task (e.g., 3.2) and the relevant FR/NFR IDs.
+
+### Quality Gates (quick commands)
+- Lint: `npm run lint` (or `pnpm lint`, `ruff .`)
+- Type-check: `tsc --noEmit` (or `mypy .`)
+- Format: `npm run format:check` (or `prettier --check .`, `black --check .`)
+- Security: `npm audit` (or `bandit -r .`, `govulncheck ./...`)
+- Coverage: `jest --coverage` (or `pytest --cov`)
+- Migrations: `bin/rails db:migrate:status` (or `alembic current heads`)

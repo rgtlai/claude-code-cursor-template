@@ -38,3 +38,9 @@ Deliver safe, incremental refactoring:
 5. **Next Actions** – follow-up refactoring opportunities if any
 
 Prefer small, safe changes. Preserve existing behavior.
+
+## Important Guidelines
+- No functional changes: preserve behaviour; if behaviour changes are required, update PRD/tasks and treat as feature work.
+- Preserve or increase test coverage and maintain FR/NFR traceability in tests and commits.
+- If refactoring unblocks tests, un-skip them and remove entries from Deferred/Skipped Tests in the tasks file.
+- Use staged, incremental commits with clear checkpoints; run targeted tests and quality gates at each checkpoint when practical.

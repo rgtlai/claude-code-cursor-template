@@ -38,3 +38,9 @@ Provide actionable code review:
 5. **Action Plan** – prioritized tasks with impact estimates
 
 Focus on actionable feedback. Prioritize critical issues first.
+
+## Important Guidelines
+- Verify FR/NFR traceability in tests and commits; flag missing mappings and require updates.
+- Check skip hygiene: skipped tests must include `BLOCKED_BY_TASK x.y` with FR/NFR references and appear in Deferred/Skipped Tests.
+- Ensure the tasks file's Test Plan Summary and Deferred/Skipped Tests are updated when tests change.
+- Recommend running quality gates (lint, type-check, format, security scan, coverage, migrations) before approval.

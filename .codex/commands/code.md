@@ -36,3 +36,7 @@ Keep explanations tight; focus on the code and what changed. Follow Codex CLI fo
 - Use the planning tool for multi-step work
 - Prefer `rg`, `sed`, and incremental diffs when inspecting or modifying files
 - Respect existing formatting and linting rules; add comments only when necessary for clarity
+- If a PRD/tasks file exists, prefer updating the relevant task and running `@process-task-list` over ad-hoc edits.
+- Maintain FR/NFR traceability in tests and commits; follow skip hygiene with `BLOCKED_BY_TASK x.y` and list deferred tests in the tasks file.
+- Targeted runs: `pytest path/to/test.py -k FR_3`, `npx jest path/to/file.test.ts -t "FR-3"`, `bin/rails test path/to/test.rb`.
+- Apply quality gates before handoff: lint, type-check, format, security scan, coverage thresholds, migrations checks, and minimal E2E/smoke if available.
