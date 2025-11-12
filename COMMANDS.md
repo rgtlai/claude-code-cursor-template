@@ -8,6 +8,39 @@ Note on Template vs. Application Docs
 - If those docs are missing or ambiguous, commands will ask clarifying questions and will not assume architecture or introduce tools without explicit approval.
 - Usage, behavior, and expectations for these commands are documented here in `COMMANDS.md` and within each command file.
 
+## CLAUDE.md Architecture Baseline (Required)
+- Before running planning or execution commands against an application repo, ensure a `CLAUDE.md` exists at that repo’s root describing or linking to the system architecture and stack baseline.
+- Copy `CLAUDE.md.template` from this repository into your application repo as `CLAUDE.md` and fill it in (or link to existing docs) before proceeding.
+- Commands that require the baseline will STOP if `CLAUDE.md` is missing or lacks an Architecture/Stack section or links.
+- When operating across repos/monorepos, pass `--repo-root /path/to/app-repo` to commands that support it so `CLAUDE.md` is resolved in the correct root.
+
+## Baseline & Governance (Strongly Recommended)
+- Global NFR budgets: Define performance SLO/SLIs, availability targets, accessibility level, and security/privacy requirements in `CLAUDE.md` or linked docs
+- ADR workflow: Capture new architectural decisions in ADRs and link them from PRDs and tasks; keep status up to date
+- Definition of Ready (DoR): Before finalizing a PRD, confirm architecture/data ownership, UX states (or explicit deferral), security/tenancy strategy, and success metrics alignment to global SLOs
+- Definition of Done (DoD): At parent task closure, enforce tests green, quality gates, feature flags configured, and operational readiness (logging/metrics/tracing, dashboards/alerts, runbooks)
+- Test environments: Standardize ephemeral integration/DB environments (e.g., Testcontainers or docker‑compose) and document quick commands in `CLAUDE.md`
+ - Templates: see `docs/adr/0000-adr-template.md` and `docs/governance/dor-dod.md`
+
+## Getting Started (Minimal Steps)
+- Copy baseline: `cp CLAUDE.md.template CLAUDE.md` and fill ONLY these minimum fields:
+  - Architecture link(s) and service boundaries
+  - Tech stack: languages/runtimes + FE/BE frameworks (with versions)
+  - Primary database + migration tool; testing frameworks + coverage threshold
+  - Quality gates to enforce (lint/type/format/security); environments (Dev/Staging/Prod)
+- Import bundle with conflicts + sizing: `@import-prds.md specs/all_features.md [--repo-root PATH]`
+- Finalize a PRD with right complexity:
+  - Simple UI: `@create-prd.md prd-bundle/0001-draft-prd-foo.md --prd-complexity simple`
+  - Standard: `@create-prd.md prd-bundle/0002-draft-prd-bar.md --prd-complexity standard`
+  - Complex (multi-service/data-heavy): `@create-prd.md prd-bundle/0003-draft-prd-baz.md --prd-complexity complex`
+- Generate tasks with integration plan: `@generate-tasks.md prds/0001-prd-foo.md [--repo-root PATH]`
+- Execute efficiently with batch + frequent commits:
+  - `@process-task-list.md tasks/tasks-0001-prd-foo.md --batch parent=1.0 --commit-per-subtask --yes`
+  - Batch mode skips prompts only; it does NOT skip tests or quality gates.
+- Keep `tasks/_index.md` current: after generating each tasks file, merge global dependencies and recompute ordering; update readiness as parents complete
+- Auto-update global index: `node scripts/update-global-index.mjs` (add `--dry-run` to preview changes)
+ - Use the standard Blocked/Prereqs table scaffold in tasks files: `scaffolding/templates/blocked-prereqs-table.md`
+
 ## Available Commands
 
 ### Architecture & Planning
@@ -15,19 +48,19 @@ Note on Template vs. Application Docs
 #### `@ask`
 Provides senior-level architectural guidance by synthesizing insights from multiple specialist perspectives including systems design, technology strategy, scalability, and risk analysis. Use this when you need high-level architectural decisions, design recommendations, or guidance on complex technical questions without writing code.
 
-#### `@create-prd`
+#### `@create-prd.md`
 Generates comprehensive Product Requirements Documents for new features through structured questioning. The command walks you through gathering requirements about goals, user stories, acceptance criteria, and scope, then produces a detailed PRD saved in `/prds/` with sequential numbering. Use this at the start of any new feature to document requirements before implementation.
 
-#### `@generate-tasks`
+#### `@generate-tasks.md`
 Breaks down a PRD into actionable task lists with relevant files and sub-tasks suitable for junior developers. It analyzes both the PRD and existing codebase to create structured tasks in two phases: first generating parent tasks for approval, then detailed sub-tasks. Use this after creating a PRD to plan the implementation work. After generating a tasks file, it updates a global index at `tasks/_index.md` to track cross‑PRD dependencies and readiness.
 
-#### `@import-prds`
-Imports a single spec/bundle file containing multiple features and splits it into draft PRDs under `/prd-bundle/`, deriving a preliminary dependency graph and index. Drafts are then finalized via `@create-prd` into `/prds/` before generating tasks.
+#### `@import-prds.md`
+Imports a single spec/bundle file containing multiple features and splits it into draft PRDs under `/prd-bundle/`, deriving a preliminary dependency graph and index. Drafts are then finalized via `@create-prd.md` into `/prds/` before generating tasks.
 
 #### `@migrate-project-structure`
 Migrates an existing repository to the new PRD → Tasks workflow. Normalizes PRDs in `/prds/`, ensures each `tasks-[prd].md` includes Task Dependencies and a “Blocked/Prereqs” table (placed after “Risks & Assumptions”), and creates/updates `tasks/_index.md` to consolidate global dependencies and readiness. Supports dry-run and apply modes with plan/diff previews.
 
-#### `@process-task-list`
+#### `@process-task-list.md`
 Systematically executes tasks from a task list file one sub-task at a time with user approval between each step. It maintains progress tracking, runs tests after completing parent tasks, and creates properly formatted commits. Use this to work through generated task lists in a controlled, methodical manner.
 
 ### Code Development
@@ -120,24 +153,24 @@ Use this when adopting the new PRD → Tasks workflow in an existing repo.
 Use these quick commands and patterns across languages and frameworks to run only what matters and keep skips traceable to tasks and requirements.
 
 ### Targeted Test Runs
-- Pytest: `pytest path/to/test.py -k FR_3`
-- Jest: `npx jest path/to/file.test.ts -t "FR-3"`
-- Mocha: `npx mocha 'test/**/*.spec.ts' -g "FR-3"`
-- RSpec: `bundle exec rspec spec/path/to_spec.rb --example "FR-3"`
+- Pytest: `pytest path/to/test.py -k PRD_0007_FR_3`
+- Jest: `npx jest path/to/file.test.ts -t "PRD-0007-FR-3"`
+- Mocha: `npx mocha 'test/**/*.spec.ts' -g "PRD-0007-FR-3"`
+- RSpec: `bundle exec rspec spec/path/to_spec.rb --example "PRD-0007-FR-3"`
 - Rails test: `bin/rails test test/models/user_test.rb:42`
-- Go: `go test ./... -run FR_3`
-- Playwright: `npx playwright test -g "FR-3"`
-- Cypress (with grep): `npx cypress run --spec "cypress/e2e/path.cy.ts" --env grep=FR-3`
+- Go: `go test ./... -run PRD_0007_FR_3`
+- Playwright: `npx playwright test -g "PRD-0007-FR-3"`
+- Cypress (with grep): `npx cypress run --spec "cypress/e2e/path.cy.ts" --env grep=PRD-0007-FR-3`
 
-Tip: Use consistent FR/NFR tokens (e.g., `FR-3` or `FR_3`) in test names or descriptions to make targeted filters easy.
+Tip: Use PRD-scoped FR/NFR tokens (e.g., `PRD-0007-FR-3`, `PRD-0007-NFR-1`) in test names or descriptions to make targeted filters easy and globally unique.
 
 ### Skip Hygiene (BLOCKED_BY_TASK)
-- Pytest: `@pytest.mark.skip(reason="BLOCKED_BY_TASK 3.2 FR-5")`
-- Jest/Mocha: `test.skip('FR-5 scenario', ...) // BLOCKED_BY_TASK 3.2`
-- RSpec: `pending 'BLOCKED_BY_TASK 3.2 FR-5'`
-- Go: `t.Skip("BLOCKED_BY_TASK 3.2 FR-5")`
+- Pytest: `@pytest.mark.skip(reason="BLOCKED_BY_TASK 3.2 PRD-0007-FR-5")`
+- Jest/Mocha: `test.skip('PRD-0007-FR-5 scenario', ...) // BLOCKED_BY_TASK 3.2`
+- RSpec: `pending 'BLOCKED_BY_TASK 3.2 PRD-0007-FR-5'`
+- Go: `t.Skip("BLOCKED_BY_TASK 3.2 PRD-0007-FR-5")`
 
-Always add skipped tests to the tasks file under "Deferred/Skipped Tests" with the blocker task (e.g., 3.2) and the relevant FR/NFR IDs.
+Always add skipped tests to the tasks file under "Deferred/Skipped Tests" with the blocker task (e.g., 3.2) and the relevant PRD-scoped FR/NFR IDs.
 
 ### Quality Gates (quick commands)
 - Lint: `npm run lint` (or `pnpm lint`, `ruff .`)

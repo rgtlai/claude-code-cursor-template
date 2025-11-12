@@ -1,10 +1,10 @@
 ---
 description: Generate a Product Requirements Document (PRD) for a new feature
-argument-hint: [feature description or path]
+argument-hint: [feature description or path] [--prd-complexity simple|standard|complex]
 ---
 
 ## Usage
-`@create-prd.md <FEATURE_DESCRIPTION|PATH>`
+`@create-prd.md <FEATURE_DESCRIPTION|PATH> [--prd-complexity simple|standard|complex]`
 
 ## Context
 - Feature description or request: $ARGUMENTS (accepts plain text or a path to a file containing the description/spec)
@@ -13,12 +13,28 @@ argument-hint: [feature description or path]
 - Target audience is junior developers who will implement the feature
 - Questions will be asked to gather requirements before generating the PRD
 
+## Prerequisite: CLAUDE.md Architecture Baseline (Required)
+- Location: `CLAUDE.md` at the repository root (or provided repo root)
+- Must include or link to the system architecture and stack baseline:
+  - Languages/runtimes and versions
+  - Frontend and backend frameworks and versions
+  - Data stores (primary/secondary), messaging, and tenancy model
+  - Service boundaries and repo layout (monorepo/multi-repo pointers)
+  - Testing stack, quality gates (lint, type, format, security, coverage)
+  - CI/CD targets, environments, deployment strategy, and rollout practices
+  - Documentation conventions and pointers to architecture/design docs
+- Do not proceed until this baseline exists. If missing or incomplete, pause and create/update `CLAUDE.md` first. Confirm that global NFR budgets (performance SLO/SLIs, availability targets, accessibility level, security/privacy requirements) are present or linked; otherwise, record open questions and pause NFR scoping.
+
 ## Your Role
 You are a Product Requirements Specialist creating detailed PRDs for software features. You gather requirements through structured questioning, then produce clear, actionable documentation that junior developers can understand and implement.
 
 ## Process
-1. **Analyze Feature Request**: Review the initial feature description provided in $ARGUMENTS. If $ARGUMENTS is a readable file path, load its contents first; otherwise use the raw string
-2. **Ask Clarifying Questions**: Gather detailed requirements by asking targeted questions about:
+1. **Validate Architecture Baseline**: Read and validate `CLAUDE.md`. If missing or lacking an Architecture section or links, stop and request baseline creation/confirmation
+2. **Analyze Feature Request**: Review the initial feature description provided in $ARGUMENTS. If $ARGUMENTS is a readable file path, load its contents first; otherwise use the raw string
+3. **Ask Clarifying Questions (prioritized)**: Gather detailed requirements by asking targeted questions in three tiers and do not proceed until “Critical” items are answered:
+   - Critical blockers (must answer to proceed): scope boundaries, core business goal, target user, must-have FRs, key constraints, data model/ownership, security/tenancy
+   - Important clarifications (affect scope/solution): UX flows, integration points, rollout/flag needs, measurable NFR targets
+   - Nice-to-haves (can defer): UI polish preferences, stretch goals
    - Problem/Goal: What problem does this solve? What's the main objective?
    - Target User: Who will use this feature?
    - Core Functionality: What key actions should users be able to perform?
@@ -39,8 +55,9 @@ You are a Product Requirements Specialist creating detailed PRDs for software fe
      - Quality gates (lint, type-check, format, security scan)
      - CI and deployment targets
      - If uncertain, propose 2–3 viable options with brief trade-offs and ask the user to choose; do not assume
-3. **Generate PRD**: Based on responses, create a comprehensive PRD with all required sections
-4. **Save Document**: Save as `/prds/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.)
+   - Architectural Decisions: If the feature introduces a new architectural component or pattern, draft an ADR (Architecture Decision Record) and link it from the PRD. Keep the ADR in Proposed state until approved; do not encode assumptions in the PRD
+4. **Generate PRD**: Based on responses, create a PRD using the selected complexity profile (`simple` omits optional sections; `standard` includes common sections; `complex` includes all sections)
+5. **Save Document**: Save as `/prds/[n]-prd-[feature-name].md` where [n] is zero-padded 4-digit sequence (0001, 0002, etc.)
 
 ## Output Format
 Generate PRD with the following structure:
@@ -48,33 +65,72 @@ Generate PRD with the following structure:
 1. **Introduction/Overview** – Feature description and problem it solves
 2. **Goals** – Specific, measurable objectives
 3. **User Stories** – Detailed user narratives with benefits
-4. **Functional Requirements (FR)** – Numbered and uniquely labeled requirements (FR-1, FR-2, …). Each FR must be:
+4. **Functional Requirements (FR)** – Use PRD-scoped IDs so they’re globally unique: `PRD-[####]-FR-[n]` (e.g., `PRD-0007-FR-1`). Each FR must be:
    - Atomic and verifiable
    - Mapped to at least one acceptance criterion
    - Traceable to tasks and tests
-5. **Acceptance Criteria** – Explicit, testable criteria linked to FR IDs (e.g., FR-2.A, FR-2.B)
+5. **Acceptance Criteria** – Explicit, testable criteria linked to PRD-scoped FR IDs (e.g., `PRD-0007-FR-2.A`, `PRD-0007-FR-2.B`)
 6. **Non-Goals (Out of Scope)** – Explicit scope boundaries
-7. **Non-Functional Requirements (NFR)** – Numbered and uniquely labeled (NFR-1, NFR-2, …) for performance, security, privacy, accessibility, reliability, compliance, and scalability. Each NFR should be measurable and testable.
-8. **Design Considerations** (Optional) – UI/UX requirements, mockups, relevant components
-9. **Technical Considerations** (Optional) – Constraints, dependencies, integration points
-10. **Dependencies & Predecessors** – Map FR/NFR items to upstream dependencies (other FRs/features, services, data models, or infrastructure). For each FR, list predecessors that must be completed first
-11. **Test Strategy** – How the feature will be validated:
+7. **Non-Functional Requirements (NFR)** – Use PRD-scoped IDs: `PRD-[####]-NFR-[n]` (e.g., `PRD-0007-NFR-1`) for performance, security, privacy, accessibility, reliability, compliance, and scalability. Each NFR should be measurable and testable.
+   - Provide baselines/targets with numbers, e.g., "P95 latency <300ms", "Throughput ≥ 1k rps", "Error rate <0.1%", "A11y: WCAG 2.1 AA"
+8. **API Contract** (If applicable) – Define endpoints and schemas:
+   - Routes/methods, auth/tenancy requirements, query/body params
+   - Request/response schemas, status codes, error formats
+   - Include or link to OpenAPI/GraphQL schema when possible
+9. **Error Scenarios & Handling** – Enumerate failure modes and responses:
+   - Validation errors, network/service failures, timeouts, idempotency rules
+   - User-facing error messages, retry/backoff, safe defaults
+10. **Design Considerations** (Optional) – UI/UX requirements, mockups, relevant components
+11. **Technical Considerations** (Optional) – Constraints, dependencies, integration points
+12. **Dependencies & Predecessors** – Map FR/NFR items to upstream dependencies (other FRs/features, services, data models, or infrastructure). For each FR, list predecessors as HARD or SOFT (SOFT can proceed with stubs)
+13. **Test Strategy** – How the feature will be validated:
    - Test types: unit, integration, e2e (as applicable)
    - Test locations and naming conventions
    - Data/setup requirements and fixtures
    - Performance or security checks (if applicable)
-12. **Feature Flags & Rollout** – Whether this ships behind a flag, rollout plan, monitoring during rollout, and safe backout steps.
-13. **Data Migration Strategy** (If applicable) – Forward/backward compatibility, idempotent migrations, seed/backfill plan, and rollback plan.
-14. **Operational Readiness** – Observability and ops requirements: logging, metrics, tracing, dashboards, alerts, SLOs, runbook updates.
-15. **Reference Implementations** (Optional) – Existing modules/APIs/patterns to follow (e.g., a previously correct endpoint). Link files/lines
-16. **Traceability** – Map FR and NFR IDs → tasks → test files/specs.
-17. **Definition of Done (DoD)** – Must include:
+14. **Feature Flags & Rollout** – Whether this ships behind a flag, rollout plan, monitoring during rollout, and safe backout steps.
+15. **Data Migration Strategy** (If applicable) – Forward/backward compatibility, idempotent migrations, seed/backfill plan, and rollback plan.
+16. **Database Change Verification Checklist** (Required for PRDs involving data schema/migrations) – Verification steps that MUST be completed before marking database work as "done":
+   - [ ] Migration/schema files generated
+   - [ ] Migrations executed successfully against a clean database instance
+   - [ ] Schema verified to match model definitions (manual inspection or automated schema comparison)
+   - [ ] Data population/seed scripts tested successfully
+   - [ ] Rollback tested (downgrade/undo migrations)
+   - [ ] Re-apply tested (re-run migrations after rollback)
+   - [ ] Integration tests run against a real database instance (not mocked/in-memory)
+
+   Verification Command Examples (framework-agnostic):
+   ```bash
+   # Apply migrations
+   [migration-tool] upgrade
+
+   # Verify schema (database-specific)
+   [inspect schema command]
+
+   # Test data population
+   [run seed script]
+
+   # Run integration tests
+   [test-runner] [integration-tests] --database=real
+
+   # Test rollback and re-apply
+   [migration-tool] downgrade [previous-version]
+   [migration-tool] upgrade [current-version]
+   ```
+
+   Critical Principle: Database changes are NOT complete until the schema exists in an actual database and works as expected.
+17. **Operational Readiness** – Observability and ops requirements: logging, metrics, tracing, dashboards, alerts, SLOs, runbook updates.
+18. **Reference Implementations** (Optional) – Existing modules/APIs/patterns to follow (e.g., a previously correct endpoint). Link files/lines
+19. **Traceability** – Map FR and NFR IDs → tasks → test files/specs.
+20. **Definition of Done (DoD)** – Must include:
    - Tests written and passing for all implemented FRs
    - Integration tests for critical flows (e.g., APIs, multi-service interactions) written and passing
+   - For database changes: All items in "Database Change Verification Checklist" (Section 14) verified
    - No unresolved or unexplained skipped tests for current scope
    - Documentation and update notes completed
-18. **Success Metrics** – Measurable outcomes (e.g., "Increase user engagement by 10%")
-19. **Open Questions** – Remaining clarifications needed
+21. **Success Metrics** – Measurable outcomes (e.g., "Increase user engagement by 10%")
+22. **Open Questions** – Remaining clarifications needed
+23. **Change Control** – How revisions to this PRD propagate to tasks and tests (e.g., generate delta tasks via `@generate-tasks.md` and update traceability). Record ADR links for technical changes
 
 Keep requirements explicit, unambiguous, and accessible to junior developers.
 
@@ -83,10 +139,14 @@ Keep requirements explicit, unambiguous, and accessible to junior developers.
 - Ask clarifying questions before generating the PRD
 - Use user's answers to create a comprehensive, detailed PRD
 - Save file with proper sequential numbering in `/prds/` directory
-- Label every functional requirement with an FR ID (FR-1, FR-2, …) and ensure each acceptance criterion references at least one FR ID.
+- Label every functional requirement with a PRD-scoped FR ID (e.g., `PRD-0007-FR-1`) and ensure each acceptance criterion references at least one of those IDs.
 - Keep acceptance criteria concrete and testable; avoid ambiguous language.
 - Capture Non-Functional Requirements (NFR-1, NFR-2, …) and ensure they are measurable; derive tests or checks for them.
 - If applicable, specify feature flag defaults, rollout strategy, and backout plan.
 - Include any required data migration/backfill and operational readiness items (logging, metrics, alerts, runbook).
 - Next step after saving the PRD: run `@generate-tasks.md <PATH_TO_THIS_PRD>` to produce the tasks file.
  - Never assume architecture: when technical stack or architecture choices arise, propose options (with pros/cons) and ask the user to choose. Record only confirmed decisions
+ - Complexity profiles: `--prd-complexity simple` omits optional sections (Design/Technical Considerations, Flags/Rollout, Migration Strategy, Operational Readiness) unless the feature involves backend/API or data changes. Use `standard` by default; use `complex` for multi-service, data-heavy features.
+ - Do not proceed without a validated `CLAUDE.md` Architecture Baseline at the repo root (or provided repo root); add links to architecture/design docs if they live elsewhere
+ - Ensure Definition of Ready (DoR) is met before finalizing: architecture and data ownership confirmed; UX states available or explicitly deferred; security/tenancy clarified; success metrics aligned to global SLOs
+ - Capture ADR references for any new architectural decisions and keep them updated if the PRD changes

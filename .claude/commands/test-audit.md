@@ -1,10 +1,10 @@
 ---
 description: Audit test coverage AND correctness against specs, features, and design
-argument-hint: [[unit|integration|e2e|all] [path]]
+argument-hint: [[unit|integration|e2e|all] [path]] [--repo-root PATH]
 ---
 
 ## Usage
-`@test-audit.md [[unit|integration|e2e|all] [path] [completed-only|all-tasks] [with-run|full-run]]`
+`@test-audit.md [[unit|integration|e2e|all] [path] [completed-only|all-tasks] [with-run|full-run]] [--repo-root PATH]`
 
 ## Examples
 - `@test-audit.md` - Prompts for test type, audits entire codebase
@@ -17,13 +17,14 @@ argument-hint: [[unit|integration|e2e|all] [path]]
 ## Context
 - Test category to audit: Parsed from $ARGUMENTS (unit/integration/e2e/all)
 - Optional path restriction: Parsed from $ARGUMENTS (if provided, only audit tests in that folder)
+- Optional repo root: `--repo-root PATH` (defaults to current repo). All path resolution and `CLAUDE.md` lookup are relative to this root
 - Task scope: By default, audit only FR/NFR linked to completed tasks/subtasks ([x]) in `tasks-[prd-file-name].md`. Include pending work by adding `all-tasks`.
 - **Dual-purpose audit**: Verifies BOTH test coverage AND test correctness
 - Compares existing tests against current specification sheets, feature documentation, and design requirements
 - Identifies missing tests, incorrect test assertions, and discrepancies with specs/features/design
 - Generates or appends to `TEST_AUDIT.md` report in root directory
 - Use TodoWrite tool to track audit progress across multiple test categories
-- PRDs in `/tasks/` define Functional Requirements (FR-1, FR-2, …) and may define Non-Functional Requirements (NFR-1, NFR-2, …)
+- PRDs in `/prds/` define Functional Requirements (prefer PRD-scoped IDs like `PRD-0007-FR-1`) and may define Non-Functional Requirements (e.g., `PRD-0007-NFR-1`)
 - Tasks files `tasks-[prd-file-name].md` include a "Test Plan Summary" and a "Deferred/Skipped Tests" section that should align to FR/NFR IDs
  - Optional run mode: add `with-run` to execute targeted tests for the Implemented FR/NFR set (or path), or `full-run` to execute the full suite. Results are summarized and any failures/errors become explicit actions to fix
 
@@ -36,6 +37,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
 5. **Traceability**: Are tests mapped to PRD FR/NFR IDs, and do all FR/NFRs have corresponding tests or checks?
 
 ## Process
+0. **Prerequisite: Architecture Baseline**: Read `CLAUDE.md` at repo root (or `--repo-root`). If missing or lacking an Architecture/Stack section or links, STOP and request baseline creation/confirmation before proceeding
 1. **Argument Parsing**:
    - Parse $ARGUMENTS to extract test category and optional path
    - Parse optional scope token: `completed-only` (default) or `all-tasks`
@@ -59,7 +61,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - Files like: `SPECS.md`, `REQUIREMENTS.md`, `FEATURES.md`, `CHANGELOG.md`
    - Search for feature documentation in:
      - `/docs/features/`, `/docs/`, `/features/`
-     - PRD files in `/tasks/` directory
+     - PRD files in `/prds/` directory
    - Look for design documentation:
      - `/docs/design/`, `/design/`, `/docs/architecture/`
      - Files like: `DESIGN.md`, `UI_SPEC.md`, `API_DESIGN.md`, `ARCHITECTURE.md`
@@ -69,7 +71,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - Look for "CURRENT", "LATEST", or similar indicators
      - Note any contradictions between documents
    - If specs/design cannot be located or are ambiguous, ask user: "I found [X, Y, Z]. Which file(s) contain the current specs, features, and design requirements?"
-   - Extract FR/NFR IDs and acceptance criteria from PRD(s) in `/prds/`
+   - Extract FR/NFR IDs and acceptance criteria from PRD(s) in `/prds/`. Normalize to PRD-scoped identifiers `PRD-[####]-FR-[n]` and `PRD-[####]-NFR-[n]` for traceability
    - Locate corresponding `tasks-[prd-file-name].md` and parse:
      - "Test Plan Summary" (expected tests for each FR/NFR)
      - "Deferred/Skipped Tests" (blocked tests with reasons using BLOCKED_BY_TASK)
@@ -115,7 +117,7 @@ You are the Test Audit Specialist responsible for comprehensive test analysis ag
      - Verify each skipped test has a reason `BLOCKED_BY_TASK [parent.subtask]` and FR/NFR references
      - Flag skipped tests lacking reason or still skipped after blockers completed
    - Quality Gates & E2E/Smoke (informational; run if available or when in run mode as appropriate):
-      - Lint, type-check, format; security scan; coverage threshold/no-regression; migrations check
+      - Lint, type-check, format; security scan; coverage threshold/no-regression (compare to threshold in `CLAUDE.md`); migrations check
       - Minimal E2E/Smoke covering core happy path(s)
 5. **Run Tests (Optional: with-run | full-run)**
    - If `with-run`: execute targeted tests associated with the Implemented FR/NFR set or the provided path/category
@@ -185,8 +187,8 @@ Each audit entry should follow this format:
 ### 0. FR/NFR Traceability Matrix
 For each FR/NFR, list mapped tests/specs and status:
 
-- FR-1: tests: [`path/to/fr1.spec.ts` (pass), `path/to/fr1.integration.ts` (skip: BLOCKED_BY_TASK 3.2)]
-- FR-2: tests: [`path/to/fr2.spec.ts` (fail)]
+- PRD-0007-FR-1: tests: [`path/to/fr1.spec.ts` (pass), `path/to/fr1.integration.ts` (skip: BLOCKED_BY_TASK 3.2)]
+- PRD-0007-FR-2: tests: [`path/to/fr2.spec.ts` (fail)]
 - NFR-1 (Performance): checks: [`tests/perf/budget.test.js` (pass)]
 - NFR-2 (Accessibility): checks: [`tests/a11y/homepage.test.ts` (pass)]
 

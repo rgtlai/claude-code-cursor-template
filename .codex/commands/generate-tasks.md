@@ -10,6 +10,10 @@ Break down a Product Requirements Document into a structured, actionable task li
 - Task list will include relevant files, parent tasks, and detailed sub-tasks
 - Process involves two phases: parent tasks first, then sub-tasks after user confirmation
 
+## Prerequisite: Architecture Baseline (Required)
+- Read `CLAUDE.md` in the target application repo (or provided repo root). If missing or lacking an Architecture/Stack section or links, STOP and request baseline confirmation
+- Confirm test environment standards for integration and database verification (e.g., Testcontainers or docker‑compose) and note quick commands in the tasks file’s "Relevant Files/Notes"
+
 ## Persona & Collaboration
 Operate as the Technical Project Planner coordinating four focus roles:
 1. **Requirements Analyst** — interprets PRD requirements and user stories
@@ -43,8 +47,17 @@ Operate as the Technical Project Planner coordinating four focus roles:
    - Break down each parent task into smaller, actionable sub-tasks following this pattern per FR ID it addresses:
      - Write tests for FR-[n] (unit/integration as appropriate)
      - Implement functionality for FR-[n]
+     - For database/schema changes, add verification sub-tasks:
+       - Generate migration/schema files
+       - VERIFY: Execute migrations against a real database instance
+       - VERIFY: Inspect schema (expected tables/collections, columns/fields, types, indexes, constraints)
+       - VERIFY: Test data population/seed script with the new schema
+       - VERIFY: Test migration rollback (downgrade)
+       - VERIFY: Re-apply migrations after rollback (upgrade)
+       - VERIFY: Run integration tests against a real database (not mocked/in-memory)
      - Run targeted tests and fix failures
      - If blocked by future tasks, mark tests as skipped and add a "Deferred/Skipped Tests" entry with reason `BLOCKED_BY_TASK x.y` and FR references
+     - Require FR/NFR tokens (e.g., `PRD-0007-FR-3`, `PRD-0007-NFR-1`) in test names/describes; note this as a CI requirement
    - Ensure sub-tasks logically follow from parent task and reflect acceptance criteria
    - Consider existing codebase patterns without being constrained by them
    - For API-related work, include an "API Implementation Checklist" under the task:
@@ -61,6 +74,8 @@ Operate as the Technical Project Planner coordinating four focus roles:
     - Create or update `tasks/_index.md`
     - Add this PRD’s parent tasks and dependencies to the global Blocked/Prereqs table
     - Recompute global ordering and list conflicts/overlaps for review
+    - When PRD revisions occur, generate delta tasks and update the global index to keep dependencies accurate
+    - Command: `node scripts/update-global-index.mjs` (use `--dry-run` to preview)
     - Example (pseudocode):
       - Open `tasks/_index.md`
       - In "Blocked/Prereqs Table (Global)" add a row: `| tasks-[prd].md 1.0 | PRD-0001-FR-3; tasks-prd-0001.md 2.0 | N | Waiting for auth middleware |`
@@ -77,6 +92,7 @@ Operate as the Technical Project Planner coordinating four focus roles:
   - NFR-1 (Performance) — budget tests in `tests/perf/*` or tool configs
   - NFR-2 (Accessibility) — a11y checks in `tests/a11y/*` or CI step
   - E2E/Smoke — minimal end-to-end checks for core happy path(s)
+  - Note quick commands for targeted runs (pytest/jest/etc.) and list any required test env setup (e.g., `docker compose up db`)
 - **Deferred/Skipped Tests**:
   - `path/to/pending_fr5.spec.ts` — BLOCKED_BY_TASK 3.2 (depends on data model migration), FR-5
 - **Risks & Assumptions**:
@@ -87,11 +103,11 @@ Operate as the Technical Project Planner coordinating four focus roles:
    - 2.0 [Parent Task Title] — Blocked By: [FR-ids/tasks or none]
 
   **Blocked/Prereqs Table:**
-  Place this table near the top of the tasks file, immediately after the "Risks & Assumptions" section, to keep blockers and readiness highly visible.
+  Place this table near the top of the tasks file, immediately after the "Risks & Assumptions" section, to keep blockers and readiness highly visible. Use the scaffold at `scaffolding/templates/blocked-prereqs-table.md`.
   | Parent Task | Blocked By (FRs/Tasks) | Ready? (Y/N) | Notes |
   |---|---|---|---|
-  | 1.0 [Title] | FR-3; Task 0.0 | Y | All predecessors complete |
-  | 2.0 [Title] | FR-4; Task 1.0 | N | Waiting for auth middleware merge |
+  | 1.0 [Title] | PRD-0001-FR-3; tasks/tasks-0001-prd-auth.md 2.0 | N | Waiting for auth middleware |
+  | 2.0 [Title] | — | Y | Unblocked |
 - **Tasks Section**:
   - [ ] 1.0 Parent Task Title
     - [ ] 1.1 [Sub-task description 1.1]
@@ -99,6 +115,19 @@ Operate as the Technical Project Planner coordinating four focus roles:
   - [ ] 2.0 Parent Task Title
     - [ ] 2.1 [Sub-task description 2.1]
   - [ ] 3.0 Parent Task Title (may not require sub-tasks if purely structural)
+
+**Example: Task Breakdown for Database Schema Changes**
+- [ ] 2.0 Create Data Model and Schema (FR-8, FR-9)
+  - [ ] 2.1 Write model/schema tests (validation, relationships)
+  - [ ] 2.2 Define data model/schema
+  - [ ] 2.3 Generate migration files
+  - [ ] 2.4 VERIFY: Execute migrations against database
+  - [ ] 2.5 VERIFY: Inspect schema — confirm expected structure (tables, columns, types, indexes, constraints)
+  - [ ] 2.6 VERIFY: Test seed/population script creates sample data
+  - [ ] 2.7 VERIFY: Test rollback (downgrade migrations)
+  - [ ] 2.8 VERIFY: Re-apply (upgrade migrations after rollback)
+  - [ ] 2.9 Run integration tests against real database
+  - [ ] 2.10 Fix any test failures
 
 ## Response Style
 Write for junior developers who will implement the feature with awareness of existing codebase context. Use two-phase interaction model requiring pause after parent tasks for user confirmation before generating detailed sub-tasks. Stay concise and follow Codex CLI formatting norms.
@@ -112,3 +141,4 @@ Write for junior developers who will implement the feature with awareness of exi
  - Upstream dependency: PRD created (e.g., via `@create-prd`). Downstream: process `tasks-[prd-file-name].md` using `@process-task-list`.
  - Never assume architecture design: when stack details are missing or ambiguous, present 2–3 viable options with trade-offs and pause for explicit user selection before proceeding
  - Respect dependencies: do not begin tasks whose predecessors are unmet; mark them as "Blocked By" and proceed with unblocked items
+ - Enforce traceability in CI: fail or warn when tests/commits do not include PRD FR/NFR tokens

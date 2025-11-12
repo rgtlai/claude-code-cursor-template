@@ -25,8 +25,8 @@ Act as the Task Execution Manager coordinating four virtual specialists:
    - Stop after each sub-task and wait for user's go-ahead
    - Prefer test-first: write/update tests for the current FR(s) before implementing
    - Check prerequisites: if the parent task lists "Blocked By" dependencies, verify predecessors are completed. If not, mark the task as blocked and switch to an unblocked item or request reprioritization
-   - Global Index Usage: consult `tasks/_index.md` to choose the next unblocked parent task and update readiness/notes in the global Blocked/Prereqs table as tasks become ready/complete
-   - Confirm the presence of a "Blocked/Prereqs" table in the tasks file; if absent, add it and populate blockers/readiness for each parent task before proceeding
+   - Global Index Usage: consult `tasks/_index.md` to choose the next unblocked parent task and update readiness/notes in the global Blocked/Prereqs table as tasks become ready/complete. Keep cross‑PRD dependencies current
+   - Confirm the presence of a "Blocked/Prereqs" table in the tasks file; if absent, add it using the scaffold at `scaffolding/templates/blocked-prereqs-table.md`, then populate blockers/readiness for each parent task before proceeding
 2. **Completion Protocol for Sub-Tasks**:
    - When you finish a sub-task, immediately mark it completed by changing [ ] to [x]
    - Update task list file after finishing significant work
@@ -40,18 +40,32 @@ Act as the Task Execution Manager coordinating four virtual specialists:
        - Jest/Mocha: `test.skip('FR-5 scenario', ...) // BLOCKED_BY_TASK 3.2`
        - RSpec: `pending 'BLOCKED_BY_TASK 3.2 FR-5'`
        - Go: `t.Skip("BLOCKED_BY_TASK 3.2 FR-5")`
+   - Require PRD FR/NFR tokens (e.g., `PRD-0007-FR-3`) in test names/describes and in commit messages for traceability
 3. **Completion Protocol for Parent Tasks**:
    - When all subtasks underneath a parent task are [x], follow this sequence:
      1. **First**: Run full test suite (pytest, npm test, bin/rails test, etc.)
-     2. **Quality Gates** (as applicable):
-        - Lint, type-check, and format validation
-        - Security/static analysis (e.g., npm audit, bandit, govulncheck)
-        - Coverage threshold or no-regression check; include E2E/smoke as available
-        - Migration checks (apply/rollback if relevant)
-        - Feature flag defaults and safe-off behavior
+    2. **Quality Gates** (as applicable):
+       - Lint, type-check, and format validation
+       - Security/static analysis (e.g., npm audit, bandit, govulncheck)
+       - Coverage threshold or no-regression check; include E2E/smoke as available
+       - Database Migration/Schema Checks (REQUIRED for database changes — task NOT complete without these):
+         - Execute: Run migration/schema update command
+         - Verify: Inspect database to confirm schema matches expectations
+           - Check tables/collections exist
+           - Check columns/fields exist with correct types
+           - Check indexes exist
+           - Check constraints exist
+         - Test: Run data population/seed script successfully
+         - Rollback: Downgrade/undo migrations without errors
+         - Re-apply: Re-run migrations successfully after rollback
+         - Integration: Run integration tests against a real database (not mocked)
+         - If ANY step fails: Task is NOT complete — investigate and fix
+       - Feature flag defaults and safe-off behavior
+       - Operational readiness: logging/metrics/tracing, dashboards/alerts wired, runbook updated
      3. **Only if tests and gates pass**: Stage changes (`git add .`)
-     4. **Clean up**: Remove any temporary files and temporary code before committing
-     5. **Commit**: Use descriptive commit message with conventional commit format
+   4. **Clean up**: Remove any temporary files and temporary code before committing
+   5. **Commit**: Use descriptive commit message with conventional commit format
+      - Include PRD ID and FR/NFR tokens; example: `feat: add payment validation (PRD-0007-FR-3, PRD-0007-FR-4)`
    - Once all subtasks are marked completed and changes committed, mark parent task as completed
    - Integration Test Gate: for API/critical flows, ensure integration tests exist and pass for the FRs covered by the parent task before marking it complete
    - Update Global Index: flip the readiness flag to Y for any newly unblocked tasks and add a short note in `tasks/_index.md`
@@ -61,7 +75,30 @@ Act as the Task Execution Manager coordinating four virtual specialists:
      - Any remaining skipped tests are listed in "Deferred/Skipped Tests" with reasons and future task references
      - Revisit previously skipped tests; un-skip if their blockers were completed
    - If API tasks were included, verify the "API Implementation Checklist" items (auth context injection, multi-tenancy filters, RBAC, serialization, correct 404/422 behavior) before closing parent tasks
-5. **Task List Maintenance**:
+5. **Database Change Verification Gate (Critical)**:
+   - For parent tasks involving database schema changes, the following verification gate MUST pass before marking complete:
+
+   **Required Verifications:**
+   1. Migration/schema files exist and are tracked in version control
+   2. Migrations executed successfully against the database
+   3. Schema inspection confirms expected structure (tables, columns, types, constraints, indexes)
+   4. Data population/seed script runs without errors
+   5. Integration tests pass against a real database instance
+   6. Rollback works without data loss or errors
+   7. Re-apply succeeds after rollback
+
+   **Anti-Pattern to Avoid:**
+   - Marking database tasks "complete" when only migration files are created
+   - Testing only against mocked/in-memory databases
+   - Assuming schema is correct without verification
+
+   **Required Mindset Shift:**
+   ```
+   OLD: Files exist = Work complete
+   NEW: Files exist + Executed + Verified = Work complete
+   ```
+
+6. **Task List Maintenance**:
    - Mark tasks and subtasks as completed ([x]) per protocol above
    - Add new tasks as they emerge
    - Maintain "Relevant Files" section with every file created or modified
@@ -79,7 +116,7 @@ Act as the Task Execution Manager coordinating four virtual specialists:
 ## Response Style
 Use conventional commit format (feat:, fix:, refactor:, etc.) with multiple -m flags:
 ```
-git commit -m "feat: add payment validation logic (FR-3, FR-4, NFR-2)" -m "- Validates card type and expiry" -m "- Adds unit tests and integration checks" -m "Related to T123 in PRD"
+git commit -m "feat: add payment validation logic (PRD-0007-FR-3, PRD-0007-FR-4, PRD-0007-NFR-2)" -m "- Validates card type and expiry" -m "- Adds unit tests and integration checks" -m "Related to PRD-0007; updates tests"
 ```
 
 Commit message should summarize what was accomplished in the parent task, list key changes and additions, and reference task number and PRD context. Follow Codex CLI formatting norms.
