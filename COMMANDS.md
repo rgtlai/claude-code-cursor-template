@@ -39,7 +39,8 @@ Note on Template vs. Application Docs
   - Batch mode skips prompts only; it does NOT skip tests or quality gates.
 - Keep `tasks/_index.md` current: after generating each tasks file, merge global dependencies and recompute ordering; update readiness as parents complete
 - Auto-update global index: `node scripts/update-global-index.mjs` (add `--dry-run` to preview changes)
- - Use the standard Blocked/Prereqs table scaffold in tasks files: `scaffolding/templates/blocked-prereqs-table.md`
+- Use the standard Blocked/Prereqs table scaffold in tasks files: `scaffolding/templates/blocked-prereqs-table.md`
+ - Enforce PRD tokens in tests: `npm run check:prd-tokens` (fails when tests lack `PRD-####-FR-n` or `PRD-####-NFR-n`)
 
 ## Available Commands
 

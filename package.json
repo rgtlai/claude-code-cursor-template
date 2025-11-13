@@ -1,0 +1,17 @@
+{
+  "name": "ai-assistant-commands",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update:tasks-index": "node scripts/update-global-index.mjs",
+    "update:tasks-index:dry": "node scripts/update-global-index.mjs --dry-run",
+    "check:prd-tokens": "node scripts/check-prd-tokens.mjs --strict",
+    "check:prd-tokens:print": "node scripts/check-prd-tokens.mjs --print",
+    "ci:verify": "npm run check:prd-tokens && npm run update:tasks-index:dry"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+

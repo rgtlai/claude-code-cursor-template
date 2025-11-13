@@ -15,10 +15,14 @@ How to Maintain
 Keep near the top; update after each tasks generation and parent completion.
 
 <!-- BEGIN AUTO-GENERATED: BLOCKED_TABLE -->
+| Task File | Parent | PRD IDs | Blocked By (FRs/Tasks) | Ready? (Y/N) | Notes |
+|---|---|---|---|---|---|
+
 <!-- END AUTO-GENERATED: BLOCKED_TABLE -->
 
 ## Topological Order (Recommended Execution)
 <!-- BEGIN AUTO-GENERATED: TOPO_ORDER -->
+
 <!-- END AUTO-GENERATED: TOPO_ORDER -->
 
 ## Cross‑PRD Conflicts & Overlaps

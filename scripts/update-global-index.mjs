@@ -20,6 +20,7 @@ const repoRoot = process.cwd();
 const tasksDir = path.resolve(repoRoot, getArg('--tasks-dir', 'tasks'));
 const indexFile = path.resolve(repoRoot, getArg('--index-file', path.join('tasks', '_index.md')));
 const dryRun = hasFlag('--dry-run');
+const debug = hasFlag('--debug');
 
 /** Simple logger */
 const log = (...m) => console.log('[update-global-index]', ...m);
@@ -27,10 +28,12 @@ const log = (...m) => console.log('[update-global-index]', ...m);
 /** Read all task files except _index.md */
 function listTaskFiles(dir) {
   if (!fs.existsSync(dir)) return [];
-  return fs
+  const files = fs
     .readdirSync(dir)
     .filter((f) => f.startsWith('tasks-') && f.endsWith('.md'))
     .map((f) => path.join(dir, f));
+  if (debug) log('Found task files:', files);
+  return files;
 }
 
 /** Extract PRD ID from filename (tasks-0007-prd-*.md => PRD-0007) */
@@ -185,11 +188,19 @@ function updateIndexFile(indexPath, tableMd, topoMd) {
     ensureSection(markers.topoStart, markers.topoEnd, '## Topological Order (Recommended Execution)');
   }
   const replaceBetween = (start, end, payload) => {
-    const re = new RegExp(`${start}[\s\S]*?${end}`);
-    return content.replace(re, `${start}\n${payload}\n${end}`);
+    const sIdx = content.indexOf(start);
+    const eIdx = content.indexOf(end, sIdx >= 0 ? sIdx + start.length : 0);
+    if (sIdx >= 0 && eIdx >= 0) {
+      const before = content.slice(0, sIdx + start.length);
+      const after = content.slice(eIdx);
+      content = `${before}\n${payload}\n${after}`;
+    } else {
+      // If markers are missing, append a new section
+      content += `\n\n${start}\n${payload}\n${end}\n`;
+    }
   };
-  content = replaceBetween(markers.tableStart, markers.tableEnd, tableMd);
-  content = replaceBetween(markers.topoStart, markers.topoEnd, topoMd);
+  replaceBetween(markers.tableStart, markers.tableEnd, tableMd);
+  replaceBetween(markers.topoStart, markers.topoEnd, topoMd);
   if (dryRun) {
     log('Dry run. New content preview:\n');
     console.log(content);
@@ -210,6 +221,7 @@ function main() {
   files.forEach((f) => {
     const prdId = prdIdFromFilename(f);
     const r = parseBlockedTable(f, prdId);
+    if (debug) log(`Parsed ${f} → ${r.length} row(s)`);
     rows.push(...r);
   });
   if (rows.length === 0) {
@@ -218,8 +230,11 @@ function main() {
   const ordered = topoOrder(rows);
   const tableMd = renderGlobalTable(rows);
   const topoMd = renderTopoList(ordered);
+  if (debug) {
+    log('tableMd:\n' + tableMd);
+    log('topoMd:\n' + topoMd);
+  }
   updateIndexFile(indexFile, tableMd, topoMd);
 }
 
 main();
-
