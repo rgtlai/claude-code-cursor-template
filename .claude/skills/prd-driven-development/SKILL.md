@@ -801,15 +801,71 @@ NEW: Files exist + Executed + Verified = Work complete
 
 **Workflow Phase:** Audit test quality and completeness
 
-**How to invoke:** "Audit tests for completed features" or "Audit unit tests in src/auth" or "Audit all tests with test execution"
+**How to invoke:**
+- "Audit tests for completed features" - Report only (default)
+- "Audit tests and update task files" - Report + auto-append missing tests
+- "Audit unit tests in src/auth" - Scoped audit
+- "Audit all tests with test execution" - Comprehensive with test runs
 
 **Purpose:** Dual-purpose audit that verifies BOTH test coverage AND test correctness against specifications.
 
-**Examples:**
-- `@test-audit` - Prompts for test type, audits entire codebase
-- `@test-audit unit` - Audits all unit tests
-- `@test-audit unit src/features/auth` - Audits unit tests in specific folder
-- `@test-audit all completed-only with-run` - Audits all tests for completed FRs/NFRs and runs them
+**Two-Phase Workflow:**
+
+**Phase 5.1 - Generate Audit Report (Always - Read-Only)**
+1. Analyze codebase for test coverage against PRD requirements
+2. Identify missing tests (coverage gaps)
+3. Identify incorrect tests (wrong assertions, missing FR/NFR IDs)
+4. Generate `TEST_AUDIT.md` report with findings
+5. Present report to user for review
+
+**Phase 5.2 - Auto-Append Missing Tests (Optional - Write)**
+After report is generated, prompt user:
+
+```
+Found 3 missing tests for PRD-0001:
+- Unit test for special char validation (PRD-0001-FR-3)
+- Integration test for POST /signup (PRD-0001-FR-3)
+- Performance test for /signup (PRD-0001-NFR-1)
+
+Should I add these as sub-tasks to your task file?
+A) Yes - Add all missing tests to tasks/tasks-0001-prd-auth.md
+B) Custom - Let me choose which tests to add
+C) No - Just show me the report (I'll add manually)
+```
+
+**If approved (Option A or B):**
+1. Determine which parent task should contain each missing test
+2. Append new sub-tasks to relevant parent tasks
+3. Mark additions with `**Added by Test Audit (YYYY-MM-DD):**` annotation
+4. Update task file checkboxes (unchecked for new tests)
+5. Preserve all existing task structure and numbering
+
+**Example Auto-Append Output:**
+
+```markdown
+### 1.0 [✅] User Registration Implementation
+  - [✅] 1.1 Write unit tests for email validation
+  - [✅] 1.2 Write integration tests for POST /signup
+  - [✅] 1.3 Implement signup logic
+  - [✅] 1.4 Run tests and verify passing
+
+  **Added by Test Audit (2025-01-15):**
+  - [ ] 1.5 Add missing unit test for special char validation (PRD-0001-FR-3)
+  - [ ] 1.6 Fix incorrect email assertion in validation.test.js:42 (PRD-0001-FR-2)
+
+### 2.0 [✅] Performance Optimization
+  - [✅] 2.1 Database query optimization
+
+  **Added by Test Audit (2025-01-15):**
+  - [ ] 2.2 Add performance test for /signup endpoint (PRD-0001-NFR-1)
+```
+
+**Invocation Examples:**
+- `@test-audit` - Report only, prompts for test type and scope
+- `@test-audit unit` - Audits all unit tests, report only
+- `@test-audit unit src/features/auth` - Scoped to auth folder
+- `@test-audit all completed-only with-run` - Audit + execute tests for completed FRs
+- `@test-audit with-update` - Report + auto-append prompt
 
 **Key Features:**
 1. **Coverage Analysis:** Identifies missing tests for specifications
@@ -818,6 +874,7 @@ NEW: Files exist + Executed + Verified = Work complete
 4. **Skip Hygiene Check:** Validates `BLOCKED_BY_TASK` notation
 5. **Quality Gates Review:** Checks lint, type, format, security, coverage
 6. **Test Execution:** Optional targeted or full test runs
+7. **Auto-Append Missing Tests:** Optional task file updates with user approval
 
 **Scope Options:**
 - `completed-only` (default) - Audit only FRs/NFRs linked to completed tasks `[x]`
@@ -828,22 +885,29 @@ NEW: Files exist + Executed + Verified = Work complete
 - `with-run` - Execute targeted tests for implemented FRs/NFRs
 - `full-run` - Execute full test suite
 
+**Update Modes:**
+- Default: Report only, no task file changes
+- `with-update` - Prompt to auto-append missing tests to task files
+
 **Deliverable:** `TEST_AUDIT.md` report with:
-- Coverage gaps (missing tests)
-- Correctness issues (wrong assertions)
+- Coverage gaps (missing tests) with suggested locations
+- Correctness issues (wrong assertions) with fix recommendations
 - FR/NFR traceability matrix
 - Deferred/skipped tests review
 - Quality gates summary
 - Recommendations (immediate, short-term, long-term)
+- **Optional:** Updated task files with missing test sub-tasks appended
 
 **When to Use:**
-- After completing parent tasks
-- Before marking PRD implementation complete
-- When verifying test suite quality
-- During code review process
-- To validate traceability compliance
+- After completing parent tasks (check for gaps in current work)
+- Before marking PRD implementation complete (comprehensive validation)
+- When verifying test suite quality (correctness audit)
+- During code review process (traceability verification)
+- To validate traceability compliance (FR/NFR mapping)
 
-**Next Step:** Address audit findings, update tests, re-run audit to verify
+**Next Steps:**
+- **Report-only mode:** Review `TEST_AUDIT.md`, manually add missing tests to task files
+- **Auto-append mode:** Review appended sub-tasks, execute them using Phase 4 protocol
 
 ## Traceability Requirements
 
