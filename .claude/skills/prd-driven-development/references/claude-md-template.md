@@ -1,8 +1,15 @@
 # CLAUDE.md — Architecture & Stack Baseline (Template)
 
-Purpose: Single source of truth for architecture, technology stack, and delivery conventions. Commands like `@import-prds.md`, `@create-prd.md`, `@generate-tasks.md`, `@process-task-list.md`, and `@test-audit.md` require this file (or linked docs) before proceeding.
+**Purpose:** Single source of truth for architecture, technology stack, and delivery conventions.
 
-Update this file per project. Link to deeper docs where appropriate.
+**⚠️ REQUIRED:** PRD-driven development workflow commands require this file before proceeding.
+
+**⚠️ IMPORTANT:** If you leave template placeholders like `[Tool name]` or `[Framework(s)]`:
+- The workflow will apply defaults: **unit + integration + E2E tests (auto-detect) REQUIRED**
+- You will be prompted to confirm or customize these defaults
+- **To avoid surprises:** Fill this template completely before starting
+
+**Update this file per project.** Link to deeper docs where appropriate.
 
 ## 1. Architecture Overview
 - System diagram link(s): [Add diagrams/links]
@@ -21,7 +28,18 @@ Update this file per project. Link to deeper docs where appropriate.
 - Primary DB: [Postgres 15], ORM/tooling: [Prisma/SQLAlchemy/ActiveRecord]
 - Secondary stores: [Redis for cache, S3 for files]
 - Messaging/streaming: [Kafka/RabbitMQ/etc.] — topics/queues, producers/consumers
-- Migrations: [Tool name] — commands, paths, conventions
+- Migrations: [Tool name: Alembic | Prisma | Flyway | Rails | Sequelize | migrate-mongo]
+  - Generate: `[npm run migration:generate | alembic revision --autogenerate]`
+  - Apply: `[npm run migrate | alembic upgrade head | rake db:migrate]`
+  - Rollback: `[npm run migrate:rollback | alembic downgrade -1]`
+  - Status: `[npm run migrate:status | alembic current]`
+- Schema state tracking:
+  - SQL: [schema.sql | prisma/schema.prisma | db/schema.rb | models in src/models/]
+  - NoSQL: [model definitions in src/models/ | schemas/ directory | JSON schema files]
+  - Migration tracking: [schema_migrations table | .migrate-mongo-status.json]
+- Seed data: [db/seeds.sql | scripts/seed.js | db/seeds.rb | fixtures/]
+- Test database setup: [Testcontainers | docker-compose test-db | in-memory SQLite/MongoDB]
+  - Quick start: `[docker-compose up -d test-db && npm run migrate | pytest (auto-starts Testcontainers)]`
 
 ## 4. APIs & Contracts
 - Public APIs: [REST/GraphQL/gRPC] — versioning strategy, auth
@@ -35,13 +53,102 @@ Update this file per project. Link to deeper docs where appropriate.
 - Secrets management: [Tool/process]
 
 ## 6. Testing Strategy
-- Unit: [Framework(s), location patterns]
-- Integration: [Real services/DB; fixtures; how to run]
-- E2E/Smoke: [Tooling, critical paths]
-- Coverage targets: [e.g., >=85% lines]
-- Test naming/mapping: Use PRD-scoped IDs `PRD-####-FR-n`, `PRD-####-NFR-n` in test names/describes
- - Test environments: [Testcontainers/docker-compose]; quick commands to start/stop required services
- - CI policy: fail/warn when tests or commits are missing PRD FR/NFR tokens
+
+**IMPORTANT: This section is AUTHORITATIVE for all PRD-driven development commands.**
+**Explicit requirements/exclusions here override skill defaults.**
+
+**Required Test Types:**
+- Unit: [Framework, location pattern] - e.g., "Jest, src/**/*.test.ts (REQUIRED)" or "None"
+- Integration: [Real services/DB setup] - e.g., "Supertest + TestContainers (REQUIRED)" or "None - mocked in unit tests"
+- E2E: [Tooling, environment] - e.g., "Playwright (REQUIRED for UI flows)" or "None (infrastructure unavailable)" or "Not applicable - backend API only"
+
+**How to Specify:**
+- **To REQUIRE a test type:** "[Framework] (REQUIRED)" or "[Framework] required for [scope]"
+- **To EXCLUDE a test type:** "None", "Not applicable", "Deferred to Q2", or "Infrastructure unavailable"
+- **If silent/template text:** Skill defaults to unit + integration required, E2E for UI-backend features
+
+**Examples:**
+
+✅ Clear Requirements:
+```
+- Unit: pytest (REQUIRED for all business logic)
+- Integration: TestContainers with PostgreSQL (REQUIRED for DB operations)
+- E2E: Playwright (REQUIRED for login, registration, checkout flows)
+```
+
+✅ Explicit Exclusion:
+```
+- Unit: Jest (REQUIRED)
+- Integration: Supertest (REQUIRED)
+- E2E: None - Infrastructure not available, planned for Sprint 5
+```
+
+✅ Mixed:
+```
+- Unit: Go testing package (REQUIRED)
+- Integration: Testcontainers (REQUIRED)
+- E2E: Not applicable - this is a backend API service with no UI
+```
+
+**Coverage Targets:**
+- Unit: [e.g., >=85% line coverage]
+- Integration: [e.g., all API endpoints, DB operations]
+- E2E: [e.g., all critical user flows OR "N/A"]
+
+**Test Infrastructure:**
+- Unit: [Setup instructions or "standard Jest setup"]
+- Integration: [docker-compose services, Testcontainers config]
+- E2E: [AUTOMATED browser automation setup, test environment URL OR "N/A"]
+
+**E2E Testing = Automated End-to-End Testing (minimize manual involvement):**
+- **JavaScript/TypeScript Frontend:** Playwright (recommended), Cypress, or Puppeteer
+- **Python Web Apps:** Playwright for Python, Selenium
+- **Go Web Apps:** chromedp, selenium-go, playwright-go
+- **Mobile Apps:** Appium, Detox (React Native)
+- **API-only services:** E2E may not be applicable (use integration tests instead)
+
+**Stack-Specific E2E Recommendations:**
+Automatically suggest the appropriate E2E framework based on detected tech stack:
+- React/Vue/Angular → Playwright or Cypress
+- Next.js/Svelte → Playwright
+- Django/Flask → Playwright for Python
+- Rails → Capybara or Playwright
+- Express/Fastify API → E2E not applicable (integration tests sufficient)
+
+**Test Naming/Mapping:**
+- Use PRD-scoped IDs `PRD-####-FR-n`, `PRD-####-NFR-n` in test names/describes
+- Test environments: [Testcontainers/docker-compose]; quick commands to start/stop required services
+- CI policy: fail/warn when tests or commits are missing PRD FR/NFR tokens
+
+**Enforcement Policy:**
+- Skip tests ONLY when: BLOCKED_BY_TASK with valid dependency reference
+- NEVER skip due to difficulty - invest effort in test setup
+- All skips must be documented in Deferred/Skipped Tests section
+
+---
+
+**📋 DEFAULTS IF THIS SECTION IS INCOMPLETE:**
+
+If Testing Strategy section contains template text (e.g., `[Framework(s)]`, `[Tool name]`), the workflow will apply these defaults:
+
+**Standard Complexity PRD (default):**
+- ✅ Unit tests: **REQUIRED** (all business logic, validation, utilities)
+- ✅ Integration tests: **REQUIRED** (all API endpoints, database operations)
+- ✅ E2E tests: **AUTOMATIC** (auto-detected for frontend-backend features like login, registration, CRUD, forms)
+
+**Simple Complexity PRD:**
+- ✅ Unit tests: For core logic only
+- ⚠️ Integration tests: Optional (only if API or database involved)
+- ⚠️ E2E tests: Optional (only if frontend-backend interaction)
+
+**Complex Complexity PRD:**
+- ✅ Unit tests: **REQUIRED** (all FRs)
+- ✅ Integration tests: **REQUIRED** (all FRs)
+- ✅ E2E tests: **REQUIRED** when applicable (all user-facing flows)
+
+**To customize:** Fill the Testing Strategy section above with explicit requirements or exclusions.
+
+---
 
 ## 7. Quality Gates
 - Lint/type/format: [Tools, commands]

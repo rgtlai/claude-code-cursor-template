@@ -1,16 +1,207 @@
 # Commands Guide - PRD-Driven Development
 
-This reference provides detailed documentation for the core PRD-driven development workflow commands.
+This reference provides detailed documentation for the core PRD-driven development workflow phases.
+
+## How to Use This Guide
+
+**Workflow phases are built into the skill.** You don't need separate slash command files. Instead:
+
+1. **Invoke the skill once:**
+   ```
+   skill: prd-driven-development
+   ```
+
+2. **Use natural language for phases:**
+   ```
+   "Import PRDs from specs/features.md"
+   "Create a PRD for user authentication"
+   "Generate tasks from prds/0001.md"
+   ```
+
+Throughout this guide, phrases like `@import-prds` are **workflow phase references**, not literal commands.
+
+---
+
+## Decision Trees
+
+Use these flowcharts to determine which workflow phase to use.
+
+### Decision Tree 1: When to Use @import-prds vs @create-prd
+
+```
+Do you have a SINGLE file with MULTIPLE features described?
+  ├─ Yes → Use Phase 1: Import PRDs (@import-prds)
+  │         - Parses bundle
+  │         - Creates draft PRDs for each feature
+  │         - Builds dependency graph
+  │         - Then use @create-prd on each draft to finalize
+  │
+  └─ No → Do you have a SINGLE feature to implement?
+            ├─ Yes → Use Phase 2: Create PRD (@create-prd)
+            │         - Directly creates finalized PRD
+            │         - Claude asks clarifying questions
+            │         - Generates PRD-####-FR-n IDs
+            │
+            └─ No → Already have finalized PRDs?
+                      └─ Use Phase 3: Generate Tasks (@generate-tasks)
+```
+
+### Decision Tree 2: When Do I Need CLAUDE.md?
+
+```
+Starting PRD-driven development workflow?
+  ├─ CLAUDE.md exists and filled?
+  │   ├─ Yes → Proceed with workflow phases
+  │   │
+  │   └─ No (has template text) → Claude will prompt:
+  │                                "Apply defaults? (yes/customize)"
+  │                                Defaults = unit + integration + E2E (auto)
+  │
+  └─ CLAUDE.md missing?
+        ├─ CLAUDE.md.template exists?
+        │   ├─ Yes → Claude copies to CLAUDE.md
+        │   │         Guides you to fill minimum sections
+        │   │         Then proceeds
+        │   │
+        │   └─ No → Claude generates basic CLAUDE.md
+        │             Detects stack from package.json/requirements.txt
+        │             Creates with placeholders
+        │             Prompts to fill before continuing
+        │
+        └─ Continue? → Must have CLAUDE.md before proceeding
+```
+
+### Decision Tree 3: Which Test Types Should I Require?
+
+```
+What type of feature are you building?
+  ├─ Backend API only (no frontend)?
+  │   ├─ Set in CLAUDE.md:
+  │   │   - Unit: REQUIRED (business logic)
+  │   │   - Integration: REQUIRED (API endpoints, DB operations)
+  │   │   - E2E: Not applicable (backend only)
+  │   │
+  │   └─ Workflow generates: unit + integration tests only
+  │
+  ├─ Frontend + Backend (full-stack)?
+  │   ├─ Has user-facing UI flows? (login, registration, CRUD, forms)
+  │   │   ├─ Yes → Set in CLAUDE.md:
+  │   │   │          - Unit: REQUIRED
+  │   │   │          - Integration: REQUIRED
+  │   │   │          - E2E: REQUIRED (Playwright/Cypress)
+  │   │   │          Workflow auto-detects E2E needs
+  │   │   │
+  │   │   └─ No (internal admin tool, simple UI) →
+  │   │              - Unit: REQUIRED
+  │   │              - Integration: REQUIRED
+  │   │              - E2E: Optional (specify in CLAUDE.md)
+  │   │
+  │   └─ Workflow generates: unit + integration + E2E (if applicable)
+  │
+  ├─ Infrastructure/scripts/config?
+  │   ├─ Set in CLAUDE.md:
+  │   │   - Unit: For core logic only
+  │   │   - Integration: Optional
+  │   │   - E2E: None
+  │   │   Use "simple" PRD complexity
+  │   │
+  │   └─ Workflow generates: minimal unit tests only
+  │
+  └─ Bug fix (no new functionality)?
+        └─ Inherit existing test requirements
+            Add tests for bug scenario only
+```
+
+### Decision Tree 4: What to Do When Tests Fail
+
+```
+Test failures during workflow execution?
+  ├─ Are tests newly written (test-first)?
+  │   ├─ Yes → Expected! Implementation not written yet
+  │   │         Mark sub-task complete (failures expected at this stage)
+  │   │         Proceed to implementation sub-task
+  │   │         Then rerun tests
+  │   │
+  │   └─ No (tests should pass) → Debug failures
+  │
+  ├─ Debug approach:
+  │   ├─ Infrastructure issue? (database not running, browser not installed)
+  │   │   ├─ Fix infrastructure:
+  │   │   │   - Start docker-compose services
+  │   │   │   - Run `npx playwright install`
+  │   │   │   - Verify Testcontainers working
+  │   │   │
+  │   │   └─ Rerun tests after fix
+  │   │
+  │   ├─ Code issue? (logic bug, wrong assertion)
+  │   │   ├─ Fix code/test assertion
+  │   │   │
+  │   │   └─ Rerun tests after fix
+  │   │
+  │   └─ Dependency not ready? (blocked by another task)
+  │         ├─ Properly mark test as skipped:
+  │         │   test.skip('PRD-0007-FR-5', () => {
+  │         │     // BLOCKED_BY_TASK 3.2: Payment API not deployed
+  │         │     // Mitigation: Using mock payment service
+  │         │     // ETA: 2025-01-20 | Owner: @jane | Safe: Yes (feature flag)
+  │         │   });
+  │         │
+  │         ├─ Add to Deferred/Skipped Tests section
+  │         │
+  │         └─ Mark sub-task complete (test properly deferred)
+  │
+  └─ After 30 minutes of debugging with no progress?
+        └─ Follow escalation path (see SKILL.md "Escalation Paths & Troubleshooting")
+            - Document what you tried
+            - Ask for help with specific questions
+            - Get clarification or workaround
+            - Update CLAUDE.md if infrastructure limitation discovered
+```
+
+### Decision Tree 5: When to Run Test Audit
+
+```
+When should I audit tests?
+  ├─ After completing a parent task?
+  │   ├─ Yes → Run targeted audit:
+  │   │         "Audit tests for completed features"
+  │   │         Scope: completed-only
+  │   │         Identifies gaps in current work
+  │   │
+  │   └─ No → Continue implementation
+  │
+  ├─ Before marking PRD complete?
+  │   ├─ Yes → Run comprehensive audit:
+  │   │         "Audit all tests with test execution"
+  │   │         Scope: all-tasks, with-run
+  │   │         Validates entire PRD implementation
+  │   │
+  │   └─ No → Continue work
+  │
+  ├─ During code review?
+  │   ├─ Yes → Run audit on specific area:
+  │   │         "Audit unit tests in src/features/auth"
+  │   │         Focuses on code under review
+  │   │
+  │   └─ No → Proceed with review
+  │
+  └─ Suspected test quality issues? (flaky tests, wrong assertions)
+        └─ Run correctness audit:
+            "Audit all tests for completed features"
+            Reviews assertions match PRD requirements
+```
+
+---
 
 ## Core Workflow Commands
 
-The PRD-driven development workflow consists of 5 phases with corresponding commands:
+The PRD-driven development workflow consists of 5 phases:
 
-1. **@import-prds** (optional) - Parse feature bundles into draft PRDs
-2. **@create-prd** - Create comprehensive Product Requirements Documents
-3. **@generate-tasks** - Break down PRDs into actionable task lists
-4. **@process-task-list** - Execute tasks systematically with quality gates
-5. **@test-audit** (optional) - Verify test coverage and correctness
+1. **Phase 1: Import PRDs** (optional) - Parse feature bundles into draft PRDs
+2. **Phase 2: Create PRD** - Create comprehensive Product Requirements Documents
+3. **Phase 3: Generate Tasks** - Break down PRDs into actionable task lists
+4. **Phase 4: Process Task List** - Execute tasks systematically with quality gates
+5. **Phase 5: Test Audit** (optional) - Verify test coverage and correctness
 
 ---
 
@@ -128,7 +319,8 @@ The PRD-driven development workflow consists of 5 phases with corresponding comm
 
 **Prerequisites:**
 - `CLAUDE.md` exists with Architecture/Stack section
-- Test environment standards confirmed
+- **READ Testing Strategy section to determine which test types are required/excluded**
+- Test environment standards confirmed for required test types
 
 **Two-Phase Process:**
 
@@ -142,18 +334,50 @@ The PRD-driven development workflow consists of 5 phases with corresponding comm
 7. Present parent tasks to user
 8. Wait for user to respond with "Go" to proceed
 
-**Phase 2 - Sub-Tasks (Test-First):**
+**Phase 2 - Sub-Tasks (CLAUDE.md-Driven Test Coverage):**
 After user confirmation:
-1. Break down each parent into sub-tasks following pattern:
-   - Write tests for FR-n (unit/integration)
-   - Implement functionality for FR-n
-   - For database changes: add verification sub-tasks
-   - Run targeted tests and fix failures
-   - Mark blocked tests as skipped with `BLOCKED_BY_TASK x.y`
-2. Include PRD FR/NFR tokens in test names/describes
-3. For APIs, include Implementation Checklist
-4. For NFR tasks, include measurable checks/harnesses
-5. Update or create `tasks/_index.md` for global dependencies
+
+**1. Parse CLAUDE.md Testing Strategy First**
+
+Determine which test types apply:
+- Explicitly REQUIRED → Generate with mandatory enforcement
+- Explicitly EXCLUDED → Do NOT generate, add exclusion note
+- Silent/unclear → Default to unit + integration required, E2E for UI-backend features
+
+**2. Generate Test Sub-Tasks Per CLAUDE.md Requirements**
+
+For EACH parent task, break down into sub-tasks following pattern:
+
+**If CLAUDE.md requires unit tests (or is silent):**
+- [ ] Write unit tests for FR-n (business logic, validation, utilities)
+- [ ] Run unit tests and fix ALL failures (invest effort, do not skip easily)
+
+**If CLAUDE.md requires integration tests (or is silent):**
+- [ ] Write integration tests for FR-n (API contracts, DB operations, service integration)
+- [ ] Run integration tests and fix ALL failures (invest effort, do not skip easily)
+
+**If CLAUDE.md requires E2E tests AND FR involves frontend-backend (or is silent + frontend-backend):**
+Auto-detect: login, registration, CRUD operations, chatbots, SSE, forms, etc.
+- [ ] Write E2E tests for FR-n (user flows, UI-to-API integration)
+- [ ] Run E2E tests and fix ALL failures (invest effort, do not skip easily)
+
+**If CLAUDE.md explicitly excludes a test type:**
+- [ ] DO NOT generate test sub-tasks for excluded type
+- [ ] Add note: "X tests excluded per CLAUDE.md Testing Strategy"
+
+**Implementation sub-task (always included):**
+- [ ] Implement functionality for FR-n
+
+**Only skip tests when:**
+- CLAUDE.md explicitly excludes that test type
+- Dependencies truly not available (mark with BLOCKED_BY_TASK x.y)
+- Infrastructure not ready (document in Deferred/Skipped Tests section)
+- NEVER skip due to difficulty - invest significant effort to make tests work
+
+3. Include PRD FR/NFR tokens in test names/describes
+4. For APIs, include Implementation Checklist
+5. For NFR tasks, include measurable checks/harnesses
+6. Update or create `tasks/_index.md` for global dependencies
 
 **Database Verification Pattern:**
 ```markdown
@@ -370,29 +594,38 @@ NEW: Files exist + Executed + Verified = Work complete
 **Process:**
 
 1. Validates CLAUDE.md architecture baseline exists
-2. Parses arguments for test category, path, scope, run mode
-3. Locates specifications, PRDs, features, and design docs
-4. Identifies test locations based on category and path
-5. Analyzes test coverage AND correctness:
+2. **Parses CLAUDE.md Testing Strategy to identify required/excluded test types**
+3. Parses arguments for test category, path, scope, run mode
+4. Locates specifications, PRDs, features, and design docs
+5. Identifies test locations based on category and path
+6. Analyzes test coverage AND correctness **against CLAUDE.md requirements:**
+   - For REQUIRED test types: Flag missing tests as CRITICAL issues
+   - For EXCLUDED test types: Flag unexpected tests as INFO (shouldn't exist)
+   - For SILENT/unclear: Apply defaults (unit + integration + E2E for UI-backend)
    - Maps tests to specs/FRs/NFRs
    - Verifies assertions match expected behavior
    - Identifies missing, incorrect, conflicting, or incomplete tests
    - Builds FR/NFR traceability matrix
    - Audits deferred/skipped tests
-6. Optionally runs tests (with-run or full-run)
-7. Generates TEST_AUDIT.md report
+7. Optionally runs tests (with-run or full-run)
+8. Generates TEST_AUDIT.md report with CLAUDE.md compliance section
 
 **Deliverable: TEST_AUDIT.md**
 
 The audit report includes:
 
 - **Executive Summary:** Category audited, scope, coverage %, critical findings
-- **Coverage Gaps:** Missing tests by FR/NFR ID with severity
+- **CLAUDE.md Compliance:** (NEW)
+  - Required test types from CLAUDE.md
+  - Excluded test types from CLAUDE.md
+  - Compliance status for each test type
+  - Violations (missing required tests, unexpected excluded tests)
+- **Coverage Gaps:** Missing tests by FR/NFR ID with severity (CRITICAL if required by CLAUDE.md)
 - **Correctness Issues:** Tests with wrong assertions, contradictions, false positives
 - **Test Quality Issues:** Incomplete, ambiguous, outdated tests
 - **FR/NFR Traceability Matrix:** Mapping with pass/fail/skip status
-- **Deferred/Skipped Tests Review:** BLOCKED_BY_TASK validation
-- **Quality Gates Summary:** Lint, type, security, coverage, migrations, E2E
+- **Deferred/Skipped Tests Review:** BLOCKED_BY_TASK validation, "too hard" anti-patterns
+- **Quality Gates Summary:** Lint, type, security, coverage vs CLAUDE.md thresholds
 - **Test Failures (Run Mode):** Failing tests with recommended actions
 - **Recommendations:** Immediate (Critical), Short-term (High), Long-term (Medium/Low)
 
@@ -706,6 +939,231 @@ Always add skipped tests to "Deferred/Skipped Tests" section in tasks file:
 - `path/to/pending_fr5.spec.ts` - BLOCKED_BY_TASK 3.2 (depends on data model migration), FR-5
 - `path/to/auth_test.py` - BLOCKED_BY_TASK 1.4 (auth middleware incomplete), FR-8, NFR-3
 ```
+
+---
+
+## CLAUDE.md Authority & Override Examples
+
+### Principle: CLAUDE.md is the Source of Truth
+
+The skill MUST respect CLAUDE.md Testing Strategy as authoritative. Explicit requirements/exclusions override all defaults.
+
+---
+
+### Example 1: Full Test Coverage Required
+
+**CLAUDE.md:**
+```markdown
+## 6. Testing Strategy
+- Unit: Jest with React Testing Library (REQUIRED for all components and business logic)
+- Integration: Supertest + TestContainers with PostgreSQL (REQUIRED for all API endpoints)
+- E2E: Playwright (REQUIRED for critical user flows: auth, checkout, account management)
+- Coverage targets: >=85% lines, >=80% branches
+```
+
+**Skill Behavior:**
+✅ Generates unit + integration + E2E test sub-tasks
+✅ Enforces "make effort" principle for all three types
+✅ Flags missing tests as CRITICAL in audit
+✅ Auto-detects E2E requirements for auth/checkout flows
+✅ Validates coverage against 85%/80% thresholds
+
+---
+
+### Example 2: E2E Excluded (Infrastructure Unavailable)
+
+**CLAUDE.md:**
+```markdown
+## 6. Testing Strategy
+- Unit: pytest (REQUIRED)
+- Integration: TestContainers with PostgreSQL (REQUIRED)
+- E2E: None - Playwright infrastructure planned for Sprint 5, currently unavailable
+- Coverage targets: >=90% for unit+integration combined
+```
+
+**Skill Behavior:**
+✅ Generates unit + integration test sub-tasks ONLY
+✅ Does NOT generate E2E tests (respects explicit exclusion)
+✅ Adds note: "E2E tests excluded per CLAUDE.md: Infrastructure unavailable, planned Sprint 5"
+✅ Does NOT flag missing E2E tests in audit (excluded is compliant)
+✅ Validates coverage against 90% threshold
+
+**Anti-Pattern (What NOT to do):**
+❌ Generating E2E tests anyway because "it's best practice"
+❌ Flagging missing E2E as critical issue in audit
+❌ Ignoring CLAUDE.md exclusion
+
+---
+
+### Example 3: Backend API Only (E2E Not Applicable)
+
+**CLAUDE.md:**
+```markdown
+## 6. Testing Strategy
+- Unit: Go testing package (REQUIRED for all business logic)
+- Integration: Testcontainers with PostgreSQL + Redis (REQUIRED for all API handlers)
+- E2E: Not applicable - this is a backend API service with no frontend
+- Coverage targets: >=80% lines
+```
+
+**Skill Behavior:**
+✅ Generates unit + integration test sub-tasks
+✅ Does NOT generate E2E tests (not applicable)
+✅ Adds note: "E2E tests not applicable per CLAUDE.md: Backend API service only"
+✅ Focuses effort on comprehensive unit + integration coverage
+✅ Validates coverage against 80% threshold
+
+---
+
+### Example 4: Vague/Template CLAUDE.md (Apply Defaults)
+
+**CLAUDE.md:**
+```markdown
+## 6. Testing Strategy
+- Unit: [Framework(s), location patterns]
+- Integration: [Real services/DB; fixtures; how to run]
+- E2E/Smoke: [Tooling, critical paths]
+- Coverage targets: [e.g., >=85% lines]
+```
+
+**Skill Behavior:**
+✅ Treats as SILENT/unclear requirements
+✅ Applies DEFAULT enforcement:
+  - Unit: REQUIRED for all FRs
+  - Integration: REQUIRED for all FRs
+  - E2E: Auto-detect for frontend-backend features (login, CRUD, forms, real-time)
+✅ Generates appropriate test sub-tasks based on feature type
+✅ Prompts user to fill in CLAUDE.md Testing Strategy for clarity
+⚠️ May ask clarifying questions during @create-prd or @generate-tasks
+
+**Recommendation:**
+Fill in CLAUDE.md Testing Strategy before running workflow to avoid ambiguity.
+
+---
+
+### Example 5: Mixed Requirements (Some Required, Some Excluded)
+
+**CLAUDE.md:**
+```markdown
+## 6. Testing Strategy
+- Unit: Jest (REQUIRED for all TypeScript code)
+- Integration: None - External APIs mocked in unit tests, no real integration environment
+- E2E: Cypress (REQUIRED for user-facing features only, not admin panels)
+- Coverage targets: >=75% lines
+```
+
+**Skill Behavior:**
+✅ Generates unit test sub-tasks for ALL FRs
+✅ Does NOT generate integration test sub-tasks (explicit exclusion)
+✅ Generates E2E test sub-tasks ONLY for user-facing features:
+  - ✅ E2E for: login, registration, product browsing, checkout
+  - ❌ NO E2E for: admin dashboards, internal tools
+✅ Adds notes explaining exclusions and scoped E2E
+✅ Validates coverage against 75% threshold
+
+---
+
+### Example 6: CLAUDE.md Says Required But Tests Failing
+
+**CLAUDE.md:**
+```markdown
+- Integration: Testcontainers with PostgreSQL (REQUIRED)
+```
+
+**Scenario:** Integration tests keep failing due to container setup issues
+
+**WRONG Behavior (Anti-Pattern):**
+❌ "Integration tests are too hard, skipping for now"
+❌ Commenting out failing tests
+❌ Marking sub-task complete with tests skipped
+
+**CORRECT Behavior ("Make Effort" Principle):**
+✅ Invest significant time debugging Testcontainers setup
+✅ Research Testcontainers documentation and examples
+✅ Check Docker configuration, permissions, port conflicts
+✅ Ask for help with container orchestration if needed
+✅ Document setup steps for future developers
+✅ Only mark BLOCKED_BY_TASK if dependency truly unavailable (e.g., DB migration not ready)
+✅ Only mark sub-task complete when tests PASSING or validly blocked
+
+**Acceptable Skip (with justification):**
+```markdown
+## Deferred/Skipped Tests
+- `tests/integration/payment-processor.int.test.ts` - BLOCKED_BY_TASK 4.2 (payment gateway integration not complete), FR-12
+```
+
+**Unacceptable Skip:**
+```markdown
+❌ "Integration tests too hard to set up, will do later"
+❌ "Testcontainers not working, skipping"
+```
+
+---
+
+### Validation Checklist for @generate-tasks
+
+Before generating sub-tasks:
+- [ ] Read CLAUDE.md Testing Strategy section
+- [ ] Identify REQUIRED test types (explicit or defaulted)
+- [ ] Identify EXCLUDED test types (explicit only)
+- [ ] Generate test sub-tasks for REQUIRED types only
+- [ ] Add exclusion notes for EXCLUDED types
+- [ ] Enforce "make effort" principle for REQUIRED types
+- [ ] Do NOT generate tests for EXCLUDED types
+
+---
+
+### E2E Test Auto-Detection Criteria
+
+The workflow automatically identifies when E2E tests are required based on FR descriptions.
+
+**E2E Required - Frontend-Backend Interactions:**
+
+✅ User authentication:
+- "User can log in with email/password"
+- "User can register a new account"
+- "User can reset forgotten password"
+- "User can log out and end session"
+
+✅ Resource CRUD via UI:
+- "Admin can create new products via form"
+- "User can edit their profile information"
+- "User can delete their saved items"
+- "User can view list of orders with pagination"
+
+✅ Form submissions:
+- "User can submit contact form and receive confirmation"
+- "User can upload files with progress indicator"
+- "User can save draft and publish later"
+
+✅ Real-time features:
+- "User can chat with AI assistant and see responses stream"
+- "User receives live notifications via SSE"
+- "User sees real-time updates from other users"
+- "Dashboard displays live metrics via WebSocket"
+
+✅ Multi-step workflows:
+- "User completes checkout process (cart → shipping → payment → confirmation)"
+- "User onboarding wizard (profile → preferences → verification)"
+
+**E2E NOT Required - Backend/Utility Only:**
+
+❌ Pure backend logic:
+- "System validates email format" → Unit test sufficient
+- "API rate limits requests per IP" → Integration test sufficient
+- "Database indexes improve query performance" → Integration test sufficient
+
+❌ Utility functions:
+- "Helper function formats currency" → Unit test sufficient
+- "Logger redacts sensitive fields" → Unit test sufficient
+
+❌ Internal services:
+- "Background job processes queue" → Integration test sufficient
+- "Cache invalidation on update" → Integration test sufficient
+
+**When in Doubt:**
+- If end-user interacts with UI that calls backend API → E2E required
+- If internal system behavior or pure backend → Unit + Integration sufficient
 
 ---
 
