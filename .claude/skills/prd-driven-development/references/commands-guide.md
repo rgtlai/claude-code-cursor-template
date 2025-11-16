@@ -191,17 +191,88 @@ When should I audit tests?
             Reviews assertions match PRD requirements
 ```
 
+### Decision Tree 6: When to Extend vs Create New PRD
+
+```
+Want to add new functionality to existing feature?
+  ├─ Is the PRD completed (all tasks done)?
+  │   ├─ Yes → Continue to compatibility check
+  │   │
+  │   └─ No (PRD in progress) → Don't extend yet
+  │                              Complete current work first
+  │                              Then extend if needed
+  │
+  ├─ Compatibility check: Is new functionality backward compatible?
+  │   ├─ Does it ADD new FRs/NFRs without changing existing ones?
+  │   │   ├─ Yes → Extension criteria met ✅
+  │   │   │         Example: Add OAuth to existing email auth
+  │   │   │
+  │   │   └─ No → Does it MODIFY existing FR definitions?
+  │   │             └─ Yes → Breaking change ❌
+  │   │                       Create new PRD instead
+  │   │
+  │   ├─ Can it be implemented WITHOUT rewriting existing code?
+  │   │   ├─ Yes → Extension criteria met ✅
+  │   │   │         Example: Add new payment method alongside existing
+  │   │   │
+  │   │   └─ No → Requires existing code rewrites?
+  │   │             └─ Yes → Breaking change ❌
+  │   │                       Create new PRD instead
+  │   │
+  │   ├─ Are architecture changes backward compatible?
+  │   │   ├─ Yes → Extension criteria met ✅
+  │   │   │         Example: Add new optional microservice
+  │   │   │
+  │   │   └─ No → Incompatible architecture changes?
+  │   │             └─ Yes → Breaking change ❌
+  │   │                       Create new PRD instead
+  │   │
+  │   └─ Does it change existing API contracts?
+  │         ├─ No (only adds new endpoints) → Extension criteria met ✅
+  │         │
+  │         └─ Yes (modifies existing endpoints) → Breaking change ❌
+  │                   Create new PRD instead
+  │
+  ├─ Extension approved (all criteria met)?
+  │   └─ Use Phase 2b: Extend PRD (@extend-prd)
+  │       - Increments version (1.0 → 2.0)
+  │       - Adds new FRs/NFRs with sequential IDs
+  │       - Appends tasks to existing task file
+  │       - Updates status to "In Progress"
+  │       - Preserves v1.0 as complete
+  │
+  └─ Breaking change detected?
+        └─ Use Phase 2: Create New PRD (@create-prd)
+            - Starts fresh PRD with version 1.0
+            - Independent task file
+            - Can reference old PRD as predecessor
+            - Old PRD marked as "Superseded" (optional)
+```
+
+**Quick Reference:**
+
+| Scenario | Extension? | Action |
+|----------|-----------|--------|
+| Add OAuth to existing auth | ✅ Yes | @extend-prd PRD-0001 with OAuth |
+| Add new payment method | ✅ Yes | @extend-prd PRD-0002 with Apple Pay |
+| Change password validation rules | ❌ No | @create-prd for new auth system |
+| Rewrite API from REST to GraphQL | ❌ No | @create-prd for GraphQL API |
+| Add optional caching layer | ✅ Yes | @extend-prd PRD-0003 with Redis cache |
+| Migrate database schema | ❌ No | @create-prd for migration |
+
 ---
 
 ## Core Workflow Commands
 
-The PRD-driven development workflow consists of 5 phases:
+The PRD-driven development workflow consists of 6 phases:
 
 1. **Phase 1: Import PRDs** (optional) - Parse feature bundles into draft PRDs
 2. **Phase 2: Create PRD** - Create comprehensive Product Requirements Documents
-3. **Phase 3: Generate Tasks** - Break down PRDs into actionable task lists
-4. **Phase 4: Process Task List** - Execute tasks systematically with quality gates
-5. **Phase 5: Test Audit** (optional) - Verify test coverage and correctness
+3. **Phase 2b: Extend PRD** (optional) - Extend existing PRD with new requirements (version increment)
+4. **Phase 3: Generate Tasks** - Break down PRDs into actionable task lists
+5. **Phase 4: Process Task List** - Execute tasks systematically with quality gates
+6. **Phase 5: Test Audit** (optional) - Verify test coverage and correctness
+7. **Phase 6: Status Report** (optional) - Generate comprehensive PRD status report
 
 ---
 
@@ -305,6 +376,61 @@ The PRD-driven development workflow consists of 5 phases:
 - Documents dependencies for each FR/NFR
 - For APIs, includes Implementation Checklist
 - Ensures Definition of Ready (DoR) before finalizing
+
+---
+
+## @extend-prd
+
+**Purpose:** Extend an existing PRD with new requirements (version increment)
+
+**Usage:**
+```bash
+@extend-prd PRD-#### [EXTENSION_DESCRIPTION]
+```
+
+**Examples:**
+```bash
+# Extend with OAuth
+"Extend PRD-0001 with OAuth authentication (Google, GitHub)"
+
+# Extend with new payment methods
+"Extend PRD-0002 with Apple Pay and Google Pay support"
+```
+
+**Smart Detection:**
+- **Extension (✅):** Backward compatible → Updates PRD, appends tasks
+- **Breaking change (❌):** Incompatible → Suggests new PRD
+
+**Process:**
+1. Read existing PRD file
+2. Analyze extension requirements (ask clarifying questions)
+3. Detect extension vs breaking change
+4. Update PRD file (increment version, add FRs/NFRs)
+5. Append tasks to existing task file
+6. Update `prds/_index.md` (change status to In Progress)
+
+**Extension Criteria (Automatic Approval):**
+- Adds new FRs/NFRs with incremented IDs (FR-6, FR-7, etc.)
+- Doesn't modify existing FR acceptance criteria
+- Backward compatible architecture changes
+- Can be implemented without rewriting existing code
+
+**Breaking Change Criteria (Suggests New PRD):**
+- Modifies existing FR definitions
+- Requires existing code rewrites
+- Incompatible architecture changes
+- Changes existing API contracts
+
+**Deliverable:**
+- Updated PRD file (v2.0)
+- Appended tasks in task file
+- Updated status index
+
+**When NOT to use:**
+- Breaking changes (modify existing FRs)
+- Complete rewrites
+- Architectural incompatibilities
+→ Use @create-prd for new PRD instead
 
 ---
 
@@ -1204,3 +1330,109 @@ The workflow automatically identifies when E2E tests are required based on FR de
 2. Fix test assertions to match specs
 3. Re-run audit to verify
 4. Update traceability matrix
+
+---
+
+## @status-report
+
+**Purpose:** Generate comprehensive PRD status report
+
+**Usage:**
+```bash
+@status-report [[all|in-progress|blocked|summary|PRD-####]]
+```
+
+**Examples:**
+```bash
+# Full report
+@status-report
+
+# In-progress only (daily standup)
+@status-report in-progress
+
+# Single PRD detail
+@status-report PRD-0001
+
+# Executive summary
+@status-report summary
+```
+
+**Report Sections:**
+- Executive Summary (project health, velocity)
+- In Progress PRDs (sorted by %)
+- Recently Completed (last 30 days)
+- Draft PRDs
+- Blocked PRDs (with blocker details)
+- Dependency Chain
+- Quality Metrics
+- Recommendations
+
+**Source:** Reads from `prds/_index.md` (auto-maintained)
+
+**Deliverable:** `STATUS_REPORT.md`
+
+**When to Use:**
+- Daily standups
+- Weekly planning
+- Stakeholder updates
+- Before sprint planning
+
+**Report Example:**
+
+```markdown
+# PRD Status Report
+
+**Generated:** 2025-01-15 10:00 AM
+
+## Executive Summary
+
+**Project Health:** On Track
+
+### Overall Progress
+- **Total PRDs:** 5
+- **✅ Complete:** 3 (60%)
+- **🔄 In Progress:** 1 (20%)
+- **📋 Draft:** 1 (20%)
+
+### Velocity
+- **Completed this week:** 2 PRDs
+- **Average time to complete:** 5 days
+
+## 🔄 In Progress PRDs
+
+### PRD-0001: User Registration (v2.0)
+- **Status:** 🔄 In Progress
+- **Completion:** 60% (3/5 tasks complete)
+- **Started:** 2025-01-15
+- **Est. Completion:** 2025-01-18
+
+**Current Work:**
+- [✅] 1.0 Input Validation
+- [✅] 2.0 Database Operations
+- [✅] 3.0 API Endpoints
+- [ ] 4.0 OAuth Integration (IN PROGRESS)
+- [ ] 5.0 Security Hardening
+
+**Version History:**
+- v2.0 (current): OAuth authentication extension
+- v1.0 (complete): Email/password registration
+
+## Dependency Chain
+
+PRD-0001 (In Progress) 🔄
+  └─> PRD-0005 (Blocked - waiting on 0001)
+
+PRD-0002 (Complete) ✅
+PRD-0003 (Complete) ✅
+PRD-0004 (Draft) 📋
+```
+
+**Integration with Workflow:**
+
+Status report reads from `prds/_index.md` which is auto-maintained by:
+- Phase 2 (@create-prd) → Adds entry
+- Phase 2b (@extend-prd) → Updates version
+- Phase 3 (@generate-tasks) → Sets in-progress
+- Phase 4 (@process-task-list) → Updates completion %
+- Phase 5 (@test-audit) → Validates completion
+- Phase 6 (@status-report) → Reads and formats

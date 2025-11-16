@@ -1,6 +1,6 @@
 ---
 name: prd-driven-development
-description: "Systematic PRD-driven software development workflow for Claude Code. Use when the user wants to (1) Import/parse feature bundles into draft PRDs with dependency analysis, (2) Create comprehensive Product Requirements Documents from feature descriptions, (3) Break down PRDs into structured task lists with dependencies and test plans, (4) Systematically execute task lists with quality gates and verification protocols, (5) Audit test coverage and correctness against specifications, or (6) Build complete applications from requirements through to tested implementation following enterprise-grade practices."
+description: "Systematic PRD-driven software development workflow for Claude Code. Use when the user wants to (1) Import/parse feature bundles into draft PRDs with dependency analysis, (2) Create comprehensive Product Requirements Documents from feature descriptions, (2b) Extend existing PRDs with new requirements (version increment), (3) Break down PRDs into structured task lists with dependencies and test plans, (4) Systematically execute task lists with quality gates and verification protocols, (5) Audit test coverage and correctness against specifications, (6) Generate comprehensive PRD status reports showing completion states and progress tracking, or build complete applications from requirements through to tested implementation following enterprise-grade practices."
 ---
 
 # PRD-Driven Development Workflow
@@ -11,7 +11,7 @@ This skill provides a complete workflow for building software applications from 
 
 ### Invocation Method
 
-This skill contains a **complete 5-phase workflow** for PRD-driven development. The workflow phases are **built into the skill itself** and don't require separate slash command files.
+This skill contains a **complete 6-phase workflow** for PRD-driven development. The workflow phases are **built into the skill itself** and don't require separate slash command files.
 
 **To use this skill:**
 
@@ -23,9 +23,11 @@ This skill contains a **complete 5-phase workflow** for PRD-driven development. 
 2. **Then use natural language** to trigger workflow phases:
    - "Import PRDs from specs/features.md"
    - "Create a PRD for user authentication feature"
+   - "Extend PRD-0001 with OAuth authentication"
    - "Generate tasks from prds/0001-prd-auth.md"
    - "Process task list tasks/tasks-0001-prd-auth.md"
    - "Audit tests for completed features"
+   - "Generate status report"
 
 ### Command Notation in This Documentation
 
@@ -386,6 +388,147 @@ Related to PRD-0001
 - Traceability Matrix
 
 **Next Step:** Use Phase 3 on the finalized PRD
+
+### Phase 2b: Extend Existing PRD
+
+**Workflow Phase:** Extend an existing PRD with new requirements
+
+**How to invoke:** "Extend PRD-0001 with OAuth authentication" or "Add social login to PRD-0001"
+
+**Use when:**
+- Adding new capabilities to a completed PRD
+- Enhancing existing features without breaking changes
+- Versioning up an existing feature (v1.0 → v2.0)
+
+**Smart Detection:**
+
+The workflow automatically determines if your request is:
+- ✅ **Extension** (backward compatible) → Updates existing PRD, appends tasks
+- ❌ **Breaking change** (incompatible) → Suggests creating new PRD instead
+
+**Extension Criteria (automatic approval):**
+- Adds new FRs/NFRs with incremented IDs (FR-6, FR-7, etc.)
+- Doesn't modify existing FR acceptance criteria
+- Backward compatible architecture changes
+- Can be implemented without rewriting existing code
+
+**Breaking Change Criteria (suggests new PRD):**
+- Modifies existing FR definitions
+- Requires existing code rewrites
+- Incompatible architecture changes
+- Changes existing API contracts
+
+**Process:**
+
+1. **Read existing PRD file**
+   - Load `prds/0001-prd-feature.md`
+   - Parse current version, FRs, NFRs
+   - Check completion status in `prds/_index.md`
+
+2. **Analyze extension requirements**
+   - Ask clarifying questions about new capabilities
+   - Detect if extension or breaking change
+   - If breaking change → prompt: "This looks like a breaking change. Create new PRD instead? (yes/no)"
+
+3. **Update PRD file** (if extension approved)
+   - Increment version (1.0 → 2.0)
+   - Add new FRs/NFRs with next sequential IDs
+   - Update architecture/design sections
+   - Add to "Version History" section
+   - Update "Last Updated" timestamp
+
+4. **Generate incremental tasks**
+   - Append new parent tasks to existing task file
+   - Generate sub-tasks for new FRs/NFRs
+   - Preserve all existing tasks (don't modify completed ones)
+   - Update task numbering (if task 3.0 was last, new tasks start at 4.0)
+
+5. **Update status tracking**
+   - Update `prds/_index.md`:
+     - Change status from "✅ Complete" → "🔄 In Progress"
+     - Increment version number
+     - Add version history entry
+     - Recalculate completion % based on new tasks
+   - Update `tasks/_index.md` if cross-PRD dependencies changed
+
+**Example:**
+
+**Before (PRD-0001 v1.0 - Complete):**
+```markdown
+## Metadata
+- **PRD ID:** PRD-0001
+- **Version:** 1.0
+- **Status:** ✅ Complete
+- **Last Updated:** 2025-01-10
+
+## Functional Requirements
+### PRD-0001-FR-1: Accept registration request
+### PRD-0001-FR-2: Validate email/password
+### PRD-0001-FR-3: Check duplicate email
+### PRD-0001-FR-4: Create user record
+### PRD-0001-FR-5: Return success response
+```
+
+**After Extension (PRD-0001 v2.0 - In Progress):**
+```markdown
+## Metadata
+- **PRD ID:** PRD-0001
+- **Version:** 2.0
+- **Status:** 🔄 In Progress (60% - 3/5 new tasks complete)
+- **Last Updated:** 2025-01-15
+
+## Version History
+### v2.0 (2025-01-15) - OAuth Authentication Extension
+- Added FR-6: OAuth login flow
+- Added FR-7: Social provider integration (Google, GitHub)
+- Status: 🔄 In Progress (60%)
+
+### v1.0 (2025-01-10) - Email/Password Registration
+- Initial implementation
+- Status: ✅ Complete (deployed to production)
+
+## Functional Requirements
+### PRD-0001-FR-1: Accept registration request ✅
+### PRD-0001-FR-2: Validate email/password ✅
+### PRD-0001-FR-3: Check duplicate email ✅
+### PRD-0001-FR-4: Create user record ✅
+### PRD-0001-FR-5: Return success response ✅
+### PRD-0001-FR-6: OAuth login flow (NEW v2.0)
+### PRD-0001-FR-7: Social provider integration (NEW v2.0)
+```
+
+**Task File Update:**
+```markdown
+### 1.0 [✅] Input Validation (v1.0)
+### 2.0 [✅] Database Operations (v1.0)
+### 3.0 [✅] API Endpoints (v1.0)
+
+### 4.0 [ ] OAuth Integration (v2.0 - NEW)
+  - [ ] 4.1 Write unit tests for OAuth flow (PRD-0001-FR-6)
+  - [ ] 4.2 Write integration tests for OAuth providers (PRD-0001-FR-6)
+  - [ ] 4.3 Implement OAuth callback handler
+  - [ ] 4.4 Run tests and verify
+
+### 5.0 [ ] Social Provider Setup (v2.0 - NEW)
+  - [ ] 5.1 Configure Google OAuth (PRD-0001-FR-7)
+  - [ ] 5.2 Configure GitHub OAuth (PRD-0001-FR-7)
+  - [ ] 5.3 Add provider selection UI
+```
+
+**Status Index Update:**
+```markdown
+| PRD ID | Title | Version | Status | Completion | Tasks | Last Updated | Notes |
+|--------|-------|---------|--------|------------|-------|--------------|-------|
+| PRD-0001 | User Registration | 2.0 | 🔄 In Progress | 60% (3/5) | 5 | 2025-01-15 | v1.0 complete ✅, v2.0 OAuth in progress |
+```
+
+**Deliverable:**
+- Updated PRD file with version 2.0
+- Appended tasks in existing task file
+- Updated `prds/_index.md` with new version and status
+- Ready to execute new tasks with Phase 4
+
+**Next Step:** Use Phase 4 to process the extended task list
 
 ### Phase 3: Generate Task List
 
@@ -909,6 +1052,161 @@ C) No - Just show me the report (I'll add manually)
 - **Report-only mode:** Review `TEST_AUDIT.md`, manually add missing tests to task files
 - **Auto-append mode:** Review appended sub-tasks, execute them using Phase 4 protocol
 
+### Phase 6: Generate Status Report
+
+**Workflow Phase:** Generate comprehensive PRD status report
+
+**How to invoke:**
+- "Generate status report" - Full report (all PRDs)
+- "Show PRD status" - Full report
+- "Status report for in-progress PRDs" - Filtered view
+- "Status report for PRD-0001" - Single PRD detail
+
+**Purpose:** Provides at-a-glance visibility into all PRD completion states, progress tracking, and project health.
+
+**Process:**
+
+1. **Read `prds/_index.md`**
+   - Parse all PRD entries
+   - Extract status, completion %, version history
+   - Calculate summary statistics
+
+2. **Generate report sections:**
+   - Executive summary (total PRDs, completion stats, velocity)
+   - In-progress PRDs (sorted by % completion, with ETA)
+   - Recently completed PRDs (last 30 days)
+   - Draft PRDs (not started)
+   - Blocked PRDs (with blocker details)
+   - Superseded PRDs (archived)
+   - Dependency chain visualization
+   - Quality metrics (test coverage, quality gates)
+   - Recommendations (immediate, short-term, long-term)
+
+3. **Apply filters (if specified):**
+   - `in-progress` - Show only 🔄 In Progress PRDs
+   - `blocked` - Show only 🚫 Blocked PRDs
+   - `PRD-0001` - Show detailed status for single PRD
+   - `summary` - Executive summary only
+
+4. **Write `STATUS_REPORT.md`**
+
+**Report Sections:**
+
+**1. Executive Summary**
+```markdown
+## Executive Summary
+
+**Project Health:** On Track | At Risk | Blocked
+
+### Overall Progress
+- **Total PRDs:** 5
+- **✅ Complete:** 3 (60%)
+- **🔄 In Progress:** 1 (20%)
+- **📋 Draft:** 1 (20%)
+- **🚫 Blocked:** 0 (0%)
+
+### Velocity
+- **Completed this week:** 2 PRDs
+- **Average time to complete:** 5 days
+```
+
+**2. In Progress PRDs** (Most important section)
+```markdown
+## 🔄 In Progress PRDs
+
+### PRD-0001: User Registration (v2.0)
+- **Status:** 🔄 In Progress
+- **Completion:** 60% (3/5 tasks complete)
+- **Started:** 2025-01-15
+- **Est. Completion:** 2025-01-18 (based on current velocity)
+
+**Current Work:**
+- [✅] 1.0 Input Validation
+- [✅] 2.0 Database Operations
+- [✅] 3.0 API Endpoints
+- [ ] 4.0 OAuth Integration (IN PROGRESS)
+- [ ] 5.0 Security Hardening
+
+**Version History:**
+- v2.0 (current): OAuth authentication extension
+- v1.0 (complete): Email/password registration
+
+**Next Steps:**
+1. Complete OAuth integration (task 4.0)
+2. Run security hardening (task 5.0)
+3. Run test audit to validate coverage
+4. Deploy to staging
+```
+
+**3. Recently Completed PRDs**
+```markdown
+## ✅ Recently Completed (Last 30 Days)
+
+### PRD-0002: Payment Processing (v1.0)
+- **Completed:** 2025-01-10
+- **Duration:** 7 days
+- **Test Coverage:** 95%
+```
+
+**4. Dependency Chain**
+```markdown
+## Dependency Chain
+
+PRD-0001 (In Progress) 🔄
+  └─> PRD-0005 (Blocked - waiting on 0001)
+
+PRD-0002 (Complete) ✅
+PRD-0003 (Complete) ✅
+PRD-0004 (Draft) 📋
+```
+
+**Command Variations:**
+
+**Full Report:**
+```
+"Generate status report"
+```
+Generates complete STATUS_REPORT.md with all sections.
+
+**In-Progress Only:**
+```
+"Status report for in-progress PRDs"
+```
+Shows only 🔄 In Progress section (useful for daily standup).
+
+**Single PRD Detail:**
+```
+"Status report for PRD-0001"
+```
+Detailed breakdown of single PRD with all tasks, version history, metrics.
+
+**Summary Only:**
+```
+"Status report summary"
+```
+Executive summary section only (quick health check).
+
+**Deliverable:** `STATUS_REPORT.md` with requested scope
+
+**When to Use:**
+- Daily standups (in-progress view)
+- Weekly planning (full report)
+- Stakeholder updates (summary + in-progress)
+- Before sprint planning (identify blocked PRDs)
+- After completing PRDs (velocity tracking)
+
+**Integration with Status Index:**
+
+Status report reads from `prds/_index.md` (auto-maintained by workflow):
+- Phase 2 (@create-prd) → Adds entry
+- Phase 2b (@extend-prd) → Updates version
+- Phase 3 (@generate-tasks) → Sets in-progress
+- Phase 4 (@process-task-list) → Updates completion %
+- Phase 5 (@test-audit) → Validates completion
+- Phase 6 (@status-report) → Reads and formats
+
+**Next Step:** Use insights from report to prioritize work, unblock dependencies, or generate new PRDs
+
 ## Traceability Requirements
 
 Throughout workflow, use PRD-scoped IDs:
@@ -1231,9 +1529,11 @@ skill: prd-driven-development
 1. **Setup (one-time):** "Create CLAUDE.md from template" → Fill minimum sections
 2. **Phase 1 (optional):** "Import PRDs from specs/all_features.md" → Creates draft PRDs
 3. **Phase 2:** "Create a PRD from prd-bundle/0001-draft.md with standard complexity" → Finalizes PRD
-4. **Phase 3:** "Generate tasks from prds/0001-prd-feature.md" → Creates task list (wait for "Go" prompt)
-5. **Phase 4:** "Process task list tasks/tasks-0001-prd-feature.md" → Executes implementation
-6. **Phase 5 (optional):** "Audit tests for completed features" → Verifies quality
+4. **Phase 2b (optional):** "Extend PRD-0001 with OAuth authentication" → Updates existing PRD with new version
+5. **Phase 3:** "Generate tasks from prds/0001-prd-feature.md" → Creates task list (wait for "Go" prompt)
+6. **Phase 4:** "Process task list tasks/tasks-0001-prd-feature.md" → Executes implementation
+7. **Phase 5 (optional):** "Audit tests for completed features" → Verifies quality
+8. **Phase 6 (optional):** "Generate status report" → Shows all PRD completion states
 
 ### Targeted Test Runs
 - Pytest: `pytest path/to/test.py -k PRD_0007_FR_3`
